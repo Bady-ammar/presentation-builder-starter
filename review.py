@@ -18,6 +18,8 @@ makes the changes to deck.html, and marks each item done.
 
 No dependencies. Pure Python standard library. Stop with Ctrl-C.
 """
+from __future__ import annotations  # keep type hints lazy so Python 3.7+ works
+
 import json
 import sys
 from datetime import datetime, timezone

@@ -9,6 +9,29 @@ The default look is **Editorial**: a warm off-white canvas, serif
 headings, and a single muted accent. It works in both **English (LTR)**
 and **Arabic (RTL)** — set the direction per slide.
 
+## What you need
+
+Almost nothing — this is deliberately low-setup.
+
+- **A web browser** — to view, present, and export decks. That's the only
+  requirement for the slides themselves. No install, no build, no accounts.
+- **Python 3.7+** — *only* for the review tool (`review.py`). It uses just
+  the standard library, so there's **nothing to `pip install`**.
+  - **macOS:** often already there. A brand-new Mac will offer to install
+    the "Command Line Tools" the first time you run `python3` — one click,
+    a couple of minutes. (Or your AI agent can do it for you.)
+  - **Windows:** install once from [python.org](https://www.python.org/downloads/)
+    (tick *"Add Python to PATH"*) or the Microsoft Store. Then `python`
+    works in any terminal.
+- **An AI coding agent** (e.g. Claude Code) — to actually build and revise
+  the decks from your notes.
+- *(Optional)* **Internet on first view** — the example fonts load from
+  Google Fonts. Offline, decks fall back to clean system fonts; everything
+  still works.
+
+If you only ever open finished decks to present, you don't even need
+Python — it's purely for the review/refine step.
+
 ## What's inside
 
 | File | What it is |

@@ -187,6 +187,11 @@ How review feedback reaches you:
 1. The person runs the review server from the repo root:
    `python3 review.py` (offer to start it for them). It serves the deck
    at `http://localhost:8000/presentations/<name>/deck.html`.
+   - It needs **Python 3.7+** and has no pip dependencies. If `python3`
+     (or `python` on Windows) isn't found, help them install it before
+     continuing — macOS: the Command Line Tools prompt, or Homebrew;
+     Windows: python.org (tick "Add to PATH") or the Microsoft Store.
+     On Windows the command is usually `python review.py`.
 2. With the deck open there, a small **Review** panel appears. They can
    comment on any slide, and use **Edit mode** to fix text inline.
 3. Everything they do is written to that deck's `review.jsonl`:
