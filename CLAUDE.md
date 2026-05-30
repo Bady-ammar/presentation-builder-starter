@@ -91,11 +91,14 @@ finished decks, then help refine them.
 ├── CLAUDE.md            ← this file: your job description + the house style
 ├── theme.css            ← the visual system (colors, type, slide layouts)
 ├── deck.js              ← the slide engine (keyboard nav, fragments) — don't edit
+├── review.js            ← the review + edit overlay — don't edit
+├── review.py            ← the local review server the person runs — don't edit
 ├── slides.html          ← the EXAMPLE deck — your style reference, do not overwrite
 └── presentations/       ← one folder per presentation
     └── example/
         ├── notes.md     ← the raw content for this deck
-        └── deck.html    ← the finished deck you build (lives beside its notes)
+        ├── deck.html    ← the finished deck you build (lives beside its notes)
+        └── review.jsonl ← review comments & edits land here (created on first comment)
 ```
 
 **Each presentation is its own folder** under `presentations/`. The
@@ -118,9 +121,15 @@ self-contained and easy to copy, share, or delete.
    close) before writing markup. One idea per slide.
 4. **Write `deck.html` into the same folder.** Create
    `presentations/<short-name>/deck.html` as a full HTML file. Copy the
-   `<head>` (fonts + `theme.css` link) from `slides.html`, but fix the
-   relative paths — from inside `presentations/<name>/` the links are
-   `../../theme.css` and `../../deck.js`.
+   `<head>` (fonts + `theme.css` link) from `slides.html`. End the
+   `<body>` with BOTH scripts so the deck plays and is reviewable:
+   ```html
+   <script src="../../deck.js"></script>
+   <script src="../../review.js"></script>
+   ```
+   Fix the relative paths — from inside `presentations/<name>/`, every
+   link to a root file is `../../` (so `../../theme.css`, `../../deck.js`,
+   `../../review.js`).
 5. **Use the existing classes only.** Build from the slide types and
    helpers already in `theme.css` (see reference below). Don't invent
    new CSS unless the person asks for something the theme can't express
@@ -164,6 +173,42 @@ self-contained and easy to copy, share, or delete.
   fullscreen, bullet points reveal one click at a time.
 - To export: open in a browser and use **Print → Save as PDF**
   (the theme prints one slide per page).
+- To **review and request changes**, point them to the review server
+  (next section): `python3 review.py`, then open the deck there.
+
+## Reviewing & refining (the supervise step) — IMPORTANT
+
+A deck is rarely right on the first pass. The person reviews what you
+built and tells you what to change. This is the core loop — treat their
+review as the priority.
+
+How review feedback reaches you:
+
+1. The person runs the review server from the repo root:
+   `python3 review.py` (offer to start it for them). It serves the deck
+   at `http://localhost:8000/presentations/<name>/deck.html`.
+2. With the deck open there, a small **Review** panel appears. They can
+   comment on any slide, and use **Edit mode** to fix text inline.
+3. Everything they do is written to that deck's `review.jsonl`:
+   - `{"type":"comment", "status":"pending", "slideIndex":N, "comment":"…"}`
+     — a change they want **you** to make.
+   - `{"type":"edit", "status":"done"}` — a trivial text fix the server
+     already applied to `deck.html`. Nothing to do; it's just a log.
+   - `{"type":"edit", "status":"pending", "result":"ambiguous|not_found"}`
+     — an inline edit that couldn't be applied automatically. Apply it
+     yourself (`oldText` → `newText` on the right slide).
+
+When they say **"apply my review"** (or similar):
+
+1. Read `presentations/<name>/review.jsonl`.
+2. For each record with `"status":"pending"`, make the change in
+   `deck.html` — follow the same house style, never break a slide.
+3. Mark each one done so it doesn't get re-applied: rewrite its line in
+   `review.jsonl` with `"status":"done"` (or POST `/__review/ack` with
+   the record's `slidePath` + `ts` while the server runs).
+4. Summarize what you changed and tell them to refresh the browser.
+
+Don't invent feedback or act on records already marked `done`.
 
 ---
 

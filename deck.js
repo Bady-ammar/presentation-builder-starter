@@ -83,6 +83,9 @@
   }
 
   document.addEventListener("keydown", function (e) {
+    // Don't hijack keys while typing in a field or editing slide text
+    // (the review overlay's comment box and inline edit mode).
+    if (e.target.isContentEditable || /^(input|textarea)$/i.test(e.target.tagName)) return;
     switch (e.key) {
       case "ArrowRight":
       case " ":
@@ -106,6 +109,8 @@
   // Tap/click the right two-thirds to advance, left third to go back.
   document.addEventListener("click", function (e) {
     if (e.target.closest("a")) return; // let links work
+    // Ignore clicks on the review overlay or while editing slide text.
+    if (e.target.closest("#review-panel") || document.body.classList.contains("review-editing")) return;
     var dir = getComputedStyle(slides[current]).direction;
     var x = e.clientX / window.innerWidth;
     var forward = dir === "rtl" ? x < 0.34 : x > 0.34;

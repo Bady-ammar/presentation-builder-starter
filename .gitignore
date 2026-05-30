@@ -15,3 +15,8 @@ Desktop.ini
 # PDF exports — regenerate any time from a deck via Print → Save as PDF.
 # Your notes.md and deck.html under presentations/ are kept on purpose.
 presentations/**/*.pdf
+
+# Review feedback is local, transient working state — once your agent has
+# applied it, it's spent. Not part of the deck you share.
+review.jsonl
+presentations/**/review.jsonl

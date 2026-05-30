@@ -16,6 +16,7 @@ and **Arabic (RTL)** — set the direction per slide.
 | `CLAUDE.md` | The agent's job description + the house style. Read first. |
 | `theme.css` | The whole visual system. Recolor the deck by editing the tokens at the top. |
 | `deck.js` | The slide engine (keyboard nav + click-to-advance + fragments). |
+| `review.js` · `review.py` | The review + edit tool. Lets you comment on slides and fix text inline; your agent reads the feedback and applies it. |
 | `slides.html` | An example deck in both English and Arabic — your style reference. |
 | `presentations/` | One folder per presentation. Each holds its `notes.md` and the finished `deck.html` side by side. |
 
@@ -37,6 +38,27 @@ and **Arabic (RTL)** — set the direction per slide.
 
 Each presentation is self-contained — copy a folder to reuse it, or
 delete one to throw it away. See `presentations/example/` for the shape.
+
+## Review and refine
+
+The first draft is never the last. To review a deck and ask for changes:
+
+1. **Start the review server** from the repo root (or just ask your
+   agent to): `python3 review.py`
+2. **Open the deck** at the printed address, e.g.
+   `http://localhost:8000/presentations/<name>/deck.html`. A small
+   **Review** panel appears in the corner.
+3. **Comment or edit.**
+   - Type a comment on any slide and hit **Send to agent**.
+   - Or click **Edit mode** and fix text right on the slide — small
+     typo-level fixes save straight to the file.
+4. **Apply.** Tell your agent *"apply my review."* It reads the feedback
+   (stored in `presentations/<name>/review.jsonl`), makes the changes,
+   and marks each one done. Refresh the browser to see them.
+
+The review panel only shows up when the deck is served by `review.py`.
+When you open `deck.html` directly to present, it's just the slides —
+no panel, nothing extra.
 
 ## Controls when presenting
 
