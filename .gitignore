@@ -1,0 +1,15 @@
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Editor / agent local state
+.vscode/
+.idea/
+.claude/
+
+# Exported decks (the agent regenerates these from notes.md)
+output/*.pdf
+
+# Keep the output/ folder in the repo but ignore generated decks.
+# Delete the line below if you want to commit finished decks.
+output/*.html
