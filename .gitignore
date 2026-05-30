@@ -1,6 +1,11 @@
 # OS cruft
 .DS_Store
+._*
+.Spotlight-V100
+.Trashes
 Thumbs.db
+ehthumbs.db
+Desktop.ini
 
 # Editor / agent local state
 .vscode/
