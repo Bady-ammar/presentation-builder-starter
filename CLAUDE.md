@@ -67,8 +67,11 @@ FINISH (this is what stops onboarding from repeating):
   - DELETE this entire ONBOARDING block — every line from the opening
     `<!-- ONBOARDING:START` marker through the closing `ONBOARDING:END -->`
     marker. Use your file-edit tool to remove it from CLAUDE.md.
-  - Then tell them setup is done and show them how to start: edit
-    `notes.md`, then ask you to build the deck.
+  - Then tell them setup is done and show them how to start: just ask
+    for a presentation (e.g. "make a deck for my Q1 update"). You'll
+    create a folder for it under `presentations/`, gather the notes,
+    and build the deck there. There's an `presentations/example/` folder
+    they can peek at for the shape.
 
 ONBOARDING:END -->
 
@@ -85,31 +88,45 @@ finished decks, then help refine them.
 
 ```
 .
-├── CLAUDE.md        ← this file: your job description + the house style
-├── theme.css        ← the visual system (colors, type, slide layouts)
-├── deck.js          ← the slide engine (keyboard nav, fragments) — don't edit
-├── slides.html      ← the EXAMPLE deck — your style reference, do not overwrite
-├── notes.md         ← the person drops this deck's raw content here
-└── output/          ← you write finished decks here
+├── CLAUDE.md            ← this file: your job description + the house style
+├── theme.css            ← the visual system (colors, type, slide layouts)
+├── deck.js              ← the slide engine (keyboard nav, fragments) — don't edit
+├── slides.html          ← the EXAMPLE deck — your style reference, do not overwrite
+└── presentations/       ← one folder per presentation
+    └── example/
+        ├── notes.md     ← the raw content for this deck
+        └── deck.html    ← the finished deck you build (lives beside its notes)
 ```
+
+**Each presentation is its own folder** under `presentations/`. The
+notes and the finished deck stay together, so a presentation is
+self-contained and easy to copy, share, or delete.
 
 ## How to build a deck
 
-1. **Read the inputs.** Read `notes.md` for the content. Read
-   `slides.html` to see every slide type in use and copy its markup
-   patterns. Read the palette tokens at the top of `theme.css`.
-2. **Plan the arc.** Propose a short outline (cover → sections →
+1. **Start (or find) the presentation folder.** When the person asks
+   for a new presentation, create `presentations/<short-name>/` (kebab
+   case, e.g. `q1-board-update`) with a `notes.md` inside. Either they
+   fill `notes.md` in, or you collect the content by interviewing them
+   and write it there yourself. If they point you at an existing folder,
+   use that one.
+2. **Read the inputs.** Read that folder's `notes.md` for the content.
+   Read `slides.html` (at the repo root) to see every slide type in use
+   and copy its markup patterns. Read the palette tokens at the top of
+   `theme.css`.
+3. **Plan the arc.** Propose a short outline (cover → sections →
    close) before writing markup. One idea per slide.
-3. **Write to `output/`.** Create `output/<short-name>.html` as a full
-   HTML file. Copy the `<head>` (fonts + `theme.css` link) from
-   `slides.html`, but fix the relative paths — from `output/` the links
-   are `../theme.css` and `../deck.js`.
-4. **Use the existing classes only.** Build from the slide types and
+4. **Write `deck.html` into the same folder.** Create
+   `presentations/<short-name>/deck.html` as a full HTML file. Copy the
+   `<head>` (fonts + `theme.css` link) from `slides.html`, but fix the
+   relative paths — from inside `presentations/<name>/` the links are
+   `../../theme.css` and `../../deck.js`.
+5. **Use the existing classes only.** Build from the slide types and
    helpers already in `theme.css` (see reference below). Don't invent
    new CSS unless the person asks for something the theme can't express
    — and if you do, add it in a clearly-commented block, never by
    editing the shared tokens silently.
-5. **Tell the truth.** Never invent a number, name, date, quote, or
+6. **Tell the truth.** Never invent a number, name, date, quote, or
    logo that isn't in `notes.md`. If the notes don't cover a slide you
    think is needed, leave a visible `[TODO: …]` placeholder and say so —
    don't fill the gap with something plausible. The person reviews and
@@ -140,8 +157,9 @@ finished decks, then help refine them.
 
 - Summarize the deck you made and where it is.
 - Offer to open it in their browser — it's a plain HTML file, no server:
-  macOS `open output/<name>.html` · Windows `start output\<name>.html`
-  · Linux `xdg-open output/<name>.html`.
+  macOS `open presentations/<name>/deck.html` · Windows
+  `start presentations\<name>\deck.html` · Linux
+  `xdg-open presentations/<name>/deck.html`.
 - Remind them of the controls: → / ← (or click) to move, `F` for
   fullscreen, bullet points reveal one click at a time.
 - To export: open in a browser and use **Print → Save as PDF**

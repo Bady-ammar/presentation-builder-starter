@@ -1,16 +1,19 @@
-# Notes for this deck
+# Notes — Example Quarterly Update
 
-This is where you drop the raw content for the presentation you want
-built. Don't worry about wording, order, or design — that's the agent's
-job. Just get the facts and ideas down. Delete the example below and
-write your own.
+Each presentation lives in its own folder under `presentations/`. This
+folder is the example. To start a real one, copy it:
 
-When it's ready, ask the agent:
-> Build a deck from notes.md.
+> Make a new presentation called "q1-board-update".
+
+The agent creates `presentations/q1-board-update/` with its own
+`notes.md`. You fill in the notes (or let the agent interview you),
+then ask it to build — the finished `deck.html` lands in the **same
+folder**, right next to these notes.
+
+Don't worry about wording, order, or design — that's the agent's job.
+Just get the facts and ideas down. Replace everything below with yours.
 
 ---
-
-## Example (delete me)
 
 **Title:** Q1 Team Update
 **Audience:** my manager + the wider team

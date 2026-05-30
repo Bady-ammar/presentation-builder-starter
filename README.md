@@ -17,8 +17,7 @@ and **Arabic (RTL)** — set the direction per slide.
 | `theme.css` | The whole visual system. Recolor the deck by editing the tokens at the top. |
 | `deck.js` | The slide engine (keyboard nav + click-to-advance + fragments). |
 | `slides.html` | An example deck in both English and Arabic — your style reference. |
-| `notes.md` | Where you drop the content for the deck you want built. |
-| `output/` | Where the agent writes finished decks. |
+| `presentations/` | One folder per presentation. Each holds its `notes.md` and the finished `deck.html` side by side. |
 
 ## Quick start
 
@@ -27,12 +26,17 @@ and **Arabic (RTL)** — set the direction per slide.
    such as Claude Code. On the first run it will greet you and ask a few
    setup questions (your name, default language, accent color). That
    happens once.
-3. **Write your notes.** Put the content for your presentation in
-   `notes.md` — bullet points are fine.
-4. **Ask for the deck.** Tell the agent: *"Build a deck from notes.md."*
-   It writes a finished `.html` file into `output/`.
-5. **Present or export.** Open the file in a browser to present. To
+3. **Ask for a presentation.** Tell the agent what you need —
+   *"Make a deck for my Q1 team update."* It creates a folder for it
+   under `presentations/` and either asks you for the content or takes
+   the notes you give it.
+4. **Get the deck.** The agent writes `deck.html` into that same
+   folder, right next to its `notes.md`.
+5. **Present or export.** Open `deck.html` in a browser to present. To
    share as PDF, use **Print → Save as PDF**.
+
+Each presentation is self-contained — copy a folder to reuse it, or
+delete one to throw it away. See `presentations/example/` for the shape.
 
 ## Controls when presenting
 

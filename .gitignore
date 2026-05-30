@@ -12,9 +12,6 @@ Desktop.ini
 .idea/
 .claude/
 
-# Exported decks (the agent regenerates these from notes.md)
-output/*.pdf
-
-# Keep the output/ folder in the repo but ignore generated decks.
-# Delete the line below if you want to commit finished decks.
-output/*.html
+# PDF exports — regenerate any time from a deck via Print → Save as PDF.
+# Your notes.md and deck.html under presentations/ are kept on purpose.
+presentations/**/*.pdf
