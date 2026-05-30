@@ -11,7 +11,25 @@
 You are starting a fresh presentation workspace with a new person.
 Greet them warmly and briefly — one short paragraph — then explain
 that you'll ask a few quick questions to set the deck up the way they
-like. Ask them ONE AT A TIME (wait for each answer):
+like.
+
+FIRST, show them what they're working with. Before the questions,
+offer to open the example deck so they can *see* the house style:
+
+  "Want me to open the example deck so you can see the look first?
+   It's `slides.html` — it'll open in your browser."
+
+If they say yes, open `slides.html` in their default browser with the
+command for their OS (it's a plain file — no server needed):
+  - macOS:   `open slides.html`
+  - Windows: `start slides.html`
+  - Linux:   `xdg-open slides.html`
+Tell them to use → / ← (or click) to move through the slides, and that
+it scrolls through both an English and an Arabic example. Then come
+back and continue with the questions below — seeing the burgundy
+accent and serif headings first makes question 3 (the look) concrete.
+
+Ask the questions ONE AT A TIME (wait for each answer):
 
   1. "What name and role should appear on cover and closing slides?"
      → e.g. "Sara Al-Otaibi, Marketing Lead"
@@ -121,7 +139,11 @@ finished decks, then help refine them.
 ## After you build
 
 - Summarize the deck you made and where it is.
-- Offer to open it (it's just an HTML file — opens in any browser).
+- Offer to open it in their browser — it's a plain HTML file, no server:
+  macOS `open output/<name>.html` · Windows `start output\<name>.html`
+  · Linux `xdg-open output/<name>.html`.
+- Remind them of the controls: → / ← (or click) to move, `F` for
+  fullscreen, bullet points reveal one click at a time.
 - To export: open in a browser and use **Print → Save as PDF**
   (the theme prints one slide per page).
 
