@@ -47,9 +47,11 @@ FIRST, offer a quick look. Say something like:
 
 If yes, get it ready **without showing them any of the plumbing**:
   - Quietly start the preview in the background yourself (the commands are
-    `python3 review.py` and `python3 watch.py`, run from this folder — but
-    don't show or mention these; just run them). If Python isn't installed,
-    warmly offer to set it up for them first, then continue.
+    `python3 review.py` and `python3 watch.py --wait`, run from this folder
+    — but don't show or mention these; just run them). When `watch.py --wait`
+    exits, it's handed you a note they left — handle it, then run it again to
+    keep listening (see the review section for this loop). If Python isn't
+    installed, warmly offer to set it up for them first, then continue.
   - Open `http://localhost:8000/welcome.html` in their browser for them
     (`open` on macOS, `start` on Windows, `xdg-open` on Linux).
   - Then say, in plain words: "It's open in your browser. Use the right and
@@ -120,7 +122,7 @@ finished decks, then help refine them.
 ├── deck.js              ← the slide engine (keyboard nav, fragments) — don't edit
 ├── review.js            ← the review + edit overlay — don't edit
 ├── review.py            ← the local review server the person runs — don't edit
-├── watch.py             ← streams new comments to you live — don't edit
+├── watch.py             ← surfaces new comments to you (run with --wait) — don't edit
 ├── welcome.html         ← THE template: the guided-tour deck AND your one
 │                           style reference. It shows every slide type
 │                           (title, section, content, statement, lists,
@@ -250,18 +252,36 @@ python3 review.py        # serves http://localhost:8000  (Ctrl-C to stop)
 
 ### 2. Watch for comments and act on them as they land
 
-Once the server is up, **don't wait to be asked** — start the watcher and
-handle each comment as it arrives, the way a reviewer expects an assistant
-sitting beside them to. Run it in the background from the repo root:
+Once the server is up, **don't wait to be asked** — watch for comments and
+handle each as it arrives, the way a reviewer expects an assistant sitting
+beside them to.
+
+**Use the wait-then-exit loop — this is the part that actually works
+hands-free.** Run, from the repo root, in the background:
 
 ```
-python3 watch.py        # add the port if review.py isn't on 8000
+python3 watch.py --wait        # add the port if review.py isn't on 8000
 ```
 
-`watch.py` tails every `review.jsonl`, prints each new **pending** comment
-as a two-line block (a `[path] slide N: …` header + the raw JSON), and
-pings the server so the review panel shows a green **● watcher live**
-status. For each block it prints:
+Here's the key idea: a background process only notifies you **when it
+finishes**. A watcher that runs forever never finishes, so it would never
+wake you — you'd only see comments if the person pinged you. `--wait`
+fixes that: it blocks until the next comment(s) land, prints them, and
+**exits**. That exit is what wakes you. So the loop is:
+
+1. Launch `python3 watch.py --wait` in the background and carry on /
+   wait quietly.
+2. When it exits, it has printed one or more **pending** comments — each a
+   two-line block (a `[path] slide N: …` header + the raw JSON). Handle
+   them (below).
+3. **Launch `python3 watch.py --wait` again** to wait for the next one.
+   Keep looping until the person says they're done reviewing.
+
+(Any comment that arrives while you're busy isn't lost — the next `--wait`
+run drains the backlog immediately and exits. `watch.py` also pings the
+server so the panel shows a green **● watcher live** status.)
+
+For each printed block:
 
 1. Read the slide it points at (`slideIndex`, 0-based) in
    `presentations/<name>/deck.html` and apply the change the comment
@@ -283,10 +303,12 @@ status. For each block it prints:
 the next.** If you're blocked waiting on an answer, stay blocked; don't
 jump ahead.
 
-If you can't keep a watcher running, you can instead poll
-`GET /__review/comments?path=/presentations/<name>/deck.html` yourself —
-but `watch.py` is the intended path, and it's what lights up the status
-pill in the panel.
+Alternatives: if your tooling streams a background process's output to you
+live (line by line, without it having to exit), you can run plain
+`python3 watch.py` and react to each line as it prints. Or, with nothing
+running, poll `GET /__review/comments?path=/presentations/<name>/deck.html`
+yourself. But the `--wait` relaunch loop above is the one that works in a
+plain agent setup, and any of these lights up the panel's status pill.
 
 Record types you'll see in `review.jsonl`:
 - `{"type":"comment", "status":"pending", …}` — a change they want **you**

@@ -83,9 +83,9 @@ The first draft is never the last. To review a deck and ask for changes:
      **📌 Attach** first — your comment is pinned to exactly that element.
    - Or press **`E`** for **Edit mode** and fix text right on the slide —
      small typo-level fixes save straight to the file.
-4. **Apply.** For a live loop, have your agent run `python3 watch.py` — it
-   picks comments up as you send them, and the panel shows a green
-   **● watcher live** badge so you know it's listening. Otherwise just tell
+4. **Apply.** For a live loop, have your agent run `python3 watch.py --wait`
+   — it picks comments up as you send them (the panel shows a green
+   **● watcher live** badge so you know it's listening). Otherwise just tell
    it *"apply my review"* — it reads the feedback (stored in
    `presentations/<name>/review.jsonl`), makes the changes, and marks each
    one done. Refresh the browser to see them.

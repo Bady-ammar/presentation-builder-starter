@@ -1,28 +1,37 @@
 #!/usr/bin/env python3
 """
-watch.py — stream review comments to your AI agent in real time.
+watch.py — bring review comments to your AI agent without pinging it.
 
 Run this alongside `review.py` (which serves the deck and writes comments).
-While you review in the browser, every new comment you send lands in a
-`review.jsonl` file. This watcher tails all of them and prints each new
-*pending* comment as it arrives, so your agent can act on it the moment
-you send it — no "apply my review" needed.
+While you review in the browser, every comment you send lands in a
+`review.jsonl` file. This watcher surfaces each new *pending* one so your
+agent can act on it — no "apply my review" needed.
 
-    python3 watch.py            # watches the kit, talks to review.py on :8000
-    python3 watch.py 8080       # if you started review.py on a different port
+Two modes:
 
-How an agent uses it: run this in the background (Claude Code can do this
-for you) and treat each printed block as one task — read the slide it
-points at, make the change, then ack it so it stops being pending:
+  python3 watch.py --wait     # RECOMMENDED for an AI agent.
+      Waits until the next comment(s) arrive, prints them, then EXITS.
+      Why exit? A background process only notifies the agent when it
+      finishes — so exiting is what actually wakes the agent up. The agent
+      handles the comment, then runs `watch.py --wait` again to wait for
+      the next one. That's the hands-free loop.
+
+  python3 watch.py            # continuous: prints comments as they arrive
+      and never exits. Good for a human watching a terminal, or an agent
+      whose tooling streams a background process's output live.
+
+Add the port if review.py isn't on 8000:  python3 watch.py --wait 8080
+
+Each comment prints as a two-line block — a `[path] slide N: …` header and
+the raw JSON. To act on one: open the slide it points at, make the change,
+then ack it so it stops being pending:
 
     curl -X POST http://localhost:8000/__review/ack \
       -H 'Content-Type: application/json' \
       -d '{"slidePath":"<slidePath>","ts":"<ts>"}'
 
-It also pings the server every few seconds so the review panel can show a
-live "● watcher live" status. Stop it with Ctrl-C.
-
-No dependencies. Pure Python standard library.
+It also pings the server so the review panel shows a live "● watcher live"
+status. Stop it with Ctrl-C. No dependencies — pure standard library.
 """
 from __future__ import annotations  # keep type hints lazy so Python 3.7+ works
 
@@ -65,6 +74,21 @@ def pending_records(path: Path):
             yield rec, line
 
 
+def scan_new(seen):
+    """Return [(rel_path, record), …] for pending records not seen before."""
+    found = []
+    for f in review_files():
+        rel = f.relative_to(ROOT).as_posix()
+        for rec, _line in pending_records(f):
+            ts = rec.get("ts")
+            if ts and ts in seen:
+                continue
+            if ts:
+                seen.add(ts)
+            found.append((rel, rec))
+    return found
+
+
 def heartbeat(port: int):
     """Tell review.py we're alive so the panel shows 'watcher live'."""
     req = urllib.request.Request(
@@ -95,35 +119,38 @@ def emit(rel_path: str, rec: dict):
 
 def main():
     port = 8000
-    if len(sys.argv) > 1:
-        try:
-            port = int(sys.argv[1])
-        except ValueError:
-            pass
+    wait_mode = False
+    for arg in sys.argv[1:]:
+        if arg in ("--wait", "-w", "--once"):
+            wait_mode = True
+        else:
+            try:
+                port = int(arg)
+            except ValueError:
+                pass
 
-    seen = set()  # ts values we've already emitted
-    last_hb = 0.0
-
-    print(f"  Watching for review comments… (Ctrl-C to stop)", file=sys.stderr)
+    seen = set()        # ts values already emitted
+    msg = "Waiting for the next review comment…" if wait_mode else "Watching for review comments…"
+    print(f"  {msg} (Ctrl-C to stop)", file=sys.stderr)
     print(f"  Talking to review.py on http://localhost:{port}\n", file=sys.stderr)
+
+    heartbeat(port)
+    last_hb = time.time()
 
     try:
         while True:
-            for f in review_files():
-                rel = f.relative_to(ROOT).as_posix()
-                for rec, _line in pending_records(f):
-                    ts = rec.get("ts")
-                    if ts and ts in seen:
-                        continue
-                    if ts:
-                        seen.add(ts)
-                    emit(rel, rec)
+            found = scan_new(seen)
+            for rel, rec in found:
+                emit(rel, rec)
+            # --wait: exit as soon as we've surfaced something. Exiting is the
+            # signal that wakes the agent; it handles these, then relaunches us.
+            if wait_mode and found:
+                return
 
             now = time.time()
             if now - last_hb >= HEARTBEAT_SECONDS:
                 heartbeat(port)
                 last_hb = now
-
             time.sleep(POLL_SECONDS)
     except KeyboardInterrupt:
         print("\n  Stopped watching.\n", file=sys.stderr)
