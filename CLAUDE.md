@@ -8,76 +8,73 @@
   then DELETE this block (see "Finish" below) so it never runs again.
 =================================================================
 
-You are starting a fresh presentation workspace with a new person.
-Greet them warmly and briefly — one short paragraph — then explain
-that you'll ask a few quick questions to set the deck up the way they
-like.
+HOW TO SPEAK DURING ONBOARDING — read this first.
+Assume the person is **not technical** and may be a little unsure. You are
+their friendly guide, not an IT manual. So:
+  - Be warm, calm, and encouraging. Short, plain sentences. No jargon —
+    no "server", "localhost", "terminal", "port", "background process".
+    If you must name a thing, use everyday words ("I'll get the preview
+    ready", "your browser will open").
+  - **Do the technical setup yourself, quietly.** Never ask them to run a
+    command, install anything, or paste anything. You run the commands;
+    they just watch the result appear.
+  - One step at a time. Wait for them. Celebrate small wins ("perfect —
+    that worked"). If something needs installing (like Python), offer to
+    handle it and explain in one friendly line why.
+  - Never make them feel behind. There are no wrong answers here.
 
-FIRST, give them the guided tour. Before the questions, offer to open the
-welcome deck — it teaches the whole workflow (navigation, the commenting
-tool, edit mode, fullscreen) on its own slides, with live animated charts
-so they see what a deck can do:
+Now, the flow:
 
-  "Want a quick tour first? I'll open a short welcome deck that shows you
-   how everything works — you can even leave a comment on it to see the
-   review loop live."
+Greet them warmly in one short, friendly paragraph. Let them know you'll
+get them set up in a couple of minutes and that they don't need to know
+anything technical — you'll handle all of that.
 
-If they say yes, open it **through the review server** so the commenting
-tool is awake and they can try it for real:
+FIRST, offer a quick look. Say something like:
+  "Want me to open a short welcome deck so you can see how this works?
+   You'll step through it with the arrow keys — and even leave me a note
+   on a slide."
 
-1. Start the server in the background from the repo root: `python3 review.py`
-   (needs Python 3.7+ — see the requirements note in the review section if
-   it's missing).
-2. Start the watcher in the background too: `python3 watch.py`. This is what
-   makes the deck's status badge turn green (**● watcher live**) and streams
-   any comment they leave straight to you.
-3. Open `http://localhost:8000/welcome.html` in their default browser:
-   - macOS: `open http://localhost:8000/welcome.html`
-   - Windows: `start http://localhost:8000/welcome.html`
-   - Linux: `xdg-open http://localhost:8000/welcome.html`
+If yes, get it ready **without showing them any of the plumbing**:
+  - Quietly start the preview in the background yourself (the commands are
+    `python3 review.py` and `python3 watch.py`, run from this folder — but
+    don't show or mention these; just run them). If Python isn't installed,
+    warmly offer to set it up for them first, then continue.
+  - Open `http://localhost:8000/welcome.html` in their browser for them
+    (`open` on macOS, `start` on Windows, `xdg-open` on Linux).
+  - Then say, in plain words: "It's open in your browser. Use the right and
+    left arrow keys to move through it — it'll show you everything."
 
-Tell them to walk it with `→` / `←` (or click), and that the deck itself
-explains the pencil button (`R`), edit mode (`E`), and fullscreen (`F`).
-**Encourage them to actually leave a comment** on the "Review" slide — when
-they do, it'll arrive in your session via `watch.py`; acknowledge it warmly
-("got your comment — that's exactly how it works") so the loop feels real.
-Then come back and continue with the questions below — seeing the burgundy
-accent and serif headings first makes question 3 (the look) concrete.
+The welcome deck teaches the rest on its own slides (moving around, the
+pencil **Review** button, editing text, fullscreen, and pinning a note to
+an element). **Gently encourage them to leave a note** on the "Review"
+slide. When they do, it arrives in your chat — reply warmly ("got it —
+that's exactly how we'll work together") so the loop feels real and easy.
 
-(`slides.html` is the fuller English+Arabic style reference — point them
-there too if they want to see every slide type. You'll read it later when
-building their decks.)
+When they're done looking, continue with a few quick, friendly questions —
+ONE AT A TIME, waiting for each answer. Keep them light and conversational:
 
-Ask the questions ONE AT A TIME (wait for each answer):
-
-  1. "What name and role should appear on cover and closing slides?"
+  1. "What name and title should I put on the cover and closing slides?"
      → e.g. "Sara Al-Otaibi, Marketing Lead"
-
-  2. "What language will most of your decks be in — Arabic, English,
-      or a mix?"
+  2. "Will your decks be mostly in Arabic, English, or a mix?"
      → sets the default direction (Arabic = RTL, English = LTR).
-
-  3. "The default look is 'Editorial': warm off-white, serif
-      headings, a muted burgundy accent. Keep it, or recolor it to a
-      brand color? If recolor, give me a hex (e.g. #1F6FEB) or just
-      name the color."
+  3. "The default look is warm and editorial — off-white, elegant serif
+      headings, a muted burgundy accent. Happy to keep it, or would you
+      like your own color? Just name it or give me a hex."
      → if they give a color, update the accent.
-
   4. "What kind of presentations will you make most often?
-      (e.g. weekly team updates, client pitches, internal reviews)"
+      (weekly updates, client pitches, internal reviews…)"
      → use this to tailor structure suggestions later.
-
-  5. "Any footer text for the corner of every slide?
-      (e.g. your company or the deck name) — or leave it blank."
+  5. "Any little footer line for the corner of every slide — your company
+      or the deck name? Totally fine to skip."
 
 APPLY their answers:
-  - If they chose a new accent color, edit `theme.css`: set `--accent`
-    to their hex and `--accent-soft` to a slightly lighter shade of it.
-    Leave the rest of the palette unless they ask.
-  - If they gave footer text, set it in `slides.html` inside
-    `<div class="deck-footer">…</div>` (and use it on decks you build).
-  - Do NOT rewrite the example slides — they stay as the style
-    reference. You'll apply name/role/language when you build NEW decks.
+  - New accent color → edit `theme.css`: set `--accent` to their hex and
+    `--accent-soft` to a slightly lighter shade. Leave the rest of the
+    palette unless they ask.
+  - Footer text → remember it in the Project profile below and use it on
+    the decks you build (don't edit `welcome.html` — that's the tour).
+  - Do NOT rewrite `welcome.html` — it stays as the tour + style
+    reference. You'll apply their name/role/language on NEW decks.
 
 FINISH (this is what stops onboarding from repeating):
   - Fill in the "Project profile" section near the bottom of this file
@@ -86,12 +83,10 @@ FINISH (this is what stops onboarding from repeating):
   - DELETE this entire ONBOARDING block — every line from the opening
     `<!-- ONBOARDING:START` marker through the closing `ONBOARDING:END -->`
     marker. Use your file-edit tool to remove it from CLAUDE.md.
-  - Then tell them setup is done and show them how to start: just ask
-    for a presentation (e.g. "make a deck for my Q1 update"). You'll
-    gather the content from them however they like — most easily right
-    here in the chat — create a folder under `presentations/`, and build
-    the deck there. There's a `presentations/example/` folder they can
-    peek at for the shape.
+  - Then, in a warm sentence or two, tell them they're all set and how easy
+    it is to start: they just tell you what they need — *"make a deck for
+    my Q1 update"* — and share the details however they like, most easily
+    right here in the chat. You'll take it from there.
 
 ONBOARDING:END -->
 
@@ -115,8 +110,11 @@ finished decks, then help refine them.
 ├── review.js            ← the review + edit overlay — don't edit
 ├── review.py            ← the local review server the person runs — don't edit
 ├── watch.py             ← streams new comments to you live — don't edit
-├── welcome.html         ← the guided-tour deck shown at onboarding
-├── slides.html          ← the EXAMPLE deck — your style reference, do not overwrite
+├── welcome.html         ← THE template: the guided-tour deck AND your one
+│                           style reference. It shows every slide type
+│                           (title, section, content, statement, lists,
+│                           metrics, charts) in both English and Arabic.
+│                           Don't overwrite it — read it, copy its patterns.
 └── presentations/       ← one folder per presentation
     └── example/
         ├── deck.html    ← the finished deck you build
@@ -141,15 +139,18 @@ self-contained and easy to copy, share, or delete. The finished
    deck's folder — but that's your scratchpad, never a required input.)
 2. **Set up the folder and read your references.** Create
    `presentations/<short-name>/` (kebab case, e.g. `q1-board-update`), or
-   reuse an existing one if they point you at it. Read `slides.html` (at
-   the repo root) to see every slide type in use and copy its markup
-   patterns, and the palette tokens at the top of `theme.css`.
+   reuse an existing one if they point you at it. Read `welcome.html` (at
+   the repo root) — it's the one template, showing every slide type in
+   use — and copy its markup patterns. Also read the palette tokens at the
+   top of `theme.css`.
 3. **Plan the arc.** Propose a short outline (cover → sections →
    close) before writing markup. One idea per slide.
 4. **Write `deck.html` into the same folder.** Create
    `presentations/<short-name>/deck.html` as a full HTML file. Copy the
-   `<head>` (fonts + `theme.css` link) from `slides.html`. End the
-   `<body>` with BOTH scripts so the deck plays and is reviewable:
+   `<head>` (fonts + `theme.css` link) from `welcome.html` — but skip the
+   tutorial-only `<style>` block in it (that's just for the tour's charts;
+   add your own only if a deck needs a custom visual). End the `<body>`
+   with BOTH scripts so the deck plays and is reviewable:
    ```html
    <script src="../../deck.js"></script>
    <script src="../../review.js"></script>
@@ -196,12 +197,13 @@ self-contained and easy to copy, share, or delete. The finished
   macOS `open presentations/<name>/deck.html` · Windows
   `start presentations\<name>\deck.html` · Linux
   `xdg-open presentations/<name>/deck.html`.
-- Remind them of the controls: → / ↓ / Space (or click) to move forward,
-  ← / ↑ to go back, `F` for fullscreen, bullet points reveal one click at
-  a time. In a review session there's also a floating pencil button
-  (top-right) — `R` toggles the review panel, `E` toggles inline edit,
-  `Esc` closes. Those review controls vanish in fullscreen, so presenting
-  is always clean.
+- Remind them of the controls: → / ↓ / Space to move forward, ← / ↑ to go
+  back, `F` for fullscreen, bullet points reveal one click at a time.
+  Navigation is keyboard-only (a stray click never jumps the slide). In a
+  review session there's also a floating pencil button (top-right) — `R`
+  toggles the review panel, `E` toggles inline edit, hover an element and
+  click 📌 Attach to pin a note to it, `Esc` closes. Those review controls
+  vanish in fullscreen, so presenting is always clean.
 - To export: open in a browser and use **Print → Save as PDF**
   (the theme prints one slide per page).
 - To **review and request changes**, point them to the review server
@@ -229,10 +231,11 @@ python3 review.py        # serves http://localhost:8000  (Ctrl-C to stop)
   the command is usually `python review.py`.
 - Then tell them to open the deck at
   `http://localhost:8000/presentations/<name>/deck.html`. A floating
-  **pencil button** appears top-right; `R` (or a click) opens the review
-  panel. They comment on any slide, or use **Edit mode** (`E`) to fix
-  text inline. The button and panel disappear in fullscreen, so the same
-  deck presents clean.
+  **pencil button** appears top-right; `R` opens the review panel. They
+  comment on any slide, use **Edit mode** (`E`) to fix text inline, or
+  hover an element and click **📌 Attach** to pin a comment to that exact
+  element. The button and panel disappear in fullscreen, so the same deck
+  presents clean.
 
 ### 2. Watch for comments and act on them as they land
 
@@ -252,6 +255,14 @@ status. For each block it prints:
 1. Read the slide it points at (`slideIndex`, 0-based) in
    `presentations/<name>/deck.html` and apply the change the comment
    asks for — follow the existing house style, never break a slide.
+   - **If the record has an `elementId`** (the reviewer used 📌 Attach),
+     the comment is about that one element. The record also carries
+     `elementTag`, `elementClasses`, and `elementSnippet`. `elementId` is
+     `slide{N}-{tag}-{nth}` — the `nth`-th `<tag>` in document order within
+     slide N. Find that element, confirm it by checking `elementClasses`
+     are on it and `elementSnippet` matches its text, and change just that
+     element. If the position has drifted, fall back to searching the
+     slide for `elementSnippet` — that's the reliable recovery.
 2. **Ack it** so it stops being pending and the panel flips it to
    `done ✓`: POST `/__review/ack` with the record's `slidePath` + `ts`,
    or rewrite that line in `review.jsonl` with `"status":"done"`.

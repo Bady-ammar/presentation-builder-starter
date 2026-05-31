@@ -184,6 +184,10 @@ class Handler(BaseHTTPRequestHandler):
             "slideTitle": body.get("slideTitle", ""),
             "comment": body["comment"],
         }
+        # Optional: a specific element the reviewer pinned with the Attach button.
+        for k in ("elementId", "elementTag", "elementClasses", "elementSnippet"):
+            if body.get(k):
+                rec[k] = body[k]
         self._append_review(body["slidePath"], rec)
         n = body.get("slideIndex", 0) + 1
         print(f"  💬 comment on slide {n}: {body['comment'][:70]}")

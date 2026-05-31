@@ -39,11 +39,10 @@ Python — it's purely for the review/refine step.
 |------|------------|
 | `CLAUDE.md` | The agent's job description + the house style. Read first. |
 | `theme.css` | The whole visual system. Recolor the deck by editing the tokens at the top. |
-| `deck.js` | The slide engine (keyboard nav + click-to-advance + fragments). |
-| `review.js` · `review.py` | The review + edit tool. Lets you comment on slides and fix text inline; your agent reads the feedback and applies it. |
+| `deck.js` | The slide engine (keyboard navigation + fragments). |
+| `review.js` · `review.py` | The review + edit tool. Comment on slides, fix text inline, or pin a comment to a specific element; your agent reads the feedback and applies it. |
 | `watch.py` | Streams new comments to your agent live, and lights up the panel's **● watcher live** status. |
-| `welcome.html` | A short guided-tour deck your agent opens the first time — it teaches the controls and the review tool. |
-| `slides.html` | An example deck in both English and Arabic — your style reference. |
+| `welcome.html` | The one template — a guided-tour deck your agent opens first that also serves as the style reference (every slide type, English + Arabic). |
 | `presentations/` | One folder per presentation, holding the finished `deck.html` (the agent may keep an optional `notes.md` brief beside it). |
 
 ## Quick start
@@ -75,9 +74,11 @@ The first draft is never the last. To review a deck and ask for changes:
    `http://localhost:8000/presentations/<name>/deck.html`. A floating
    **pencil button** appears top-right — click it or press **`R`** to
    open the review panel.
-3. **Comment or edit.**
+3. **Comment, attach, or edit.**
    - Type a comment on any slide and hit **Send to agent** (or
      **Ctrl/Cmd+Enter**).
+   - Want it about one specific thing? Hover that element and click
+     **📌 Attach** first — your comment is pinned to exactly that element.
    - Or press **`E`** for **Edit mode** and fix text right on the slide —
      small typo-level fixes save straight to the file.
 4. **Apply.** For a live loop, have your agent run `python3 watch.py` — it
@@ -99,13 +100,14 @@ present, it's just the slides — nothing extra.
 | `←` / `↑` / `PageUp` | Previous |
 | `Home` / `End` | First / last slide |
 | `F` | Fullscreen |
-| click | Right side = next, left side = back (flips for RTL slides) |
 
-You can also deep-link to a slide with `#5` at the end of the URL.
+Navigation is keyboard-only — a stray click never jumps the slide. You can
+also deep-link to a slide with `#5` at the end of the URL.
 
-In a review session (deck served by `review.py`) there are three more:
-`R` toggles the review panel, `E` toggles inline edit, `Esc` closes the
-panel. All review chrome is hidden in fullscreen.
+In a review session (deck served by `review.py`) there's more: `R` toggles
+the review panel, `E` toggles inline edit, hover an element and click
+**📌 Attach** to pin a comment to it, `Esc` closes the panel. All review
+chrome is hidden in fullscreen.
 
 ## Make it yours
 

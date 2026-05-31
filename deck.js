@@ -108,17 +108,9 @@
     }
   });
 
-  // Tap/click the right two-thirds to advance, left third to go back.
-  document.addEventListener("click", function (e) {
-    if (e.target.closest("a")) return; // let links work
-    // Ignore clicks on the review overlay (panel or floating button) or while
-    // editing slide text.
-    if (e.target.closest("#review-panel, .rv-toggle-btn") || document.body.classList.contains("review-editing")) return;
-    var dir = getComputedStyle(slides[current]).direction;
-    var x = e.clientX / window.innerWidth;
-    var forward = dir === "rtl" ? x < 0.34 : x > 0.34;
-    forward ? next() : prev();
-  });
+  // Navigation is keyboard-only on purpose — a stray click never jumps the
+  // slide. That keeps clicks free for links, the review panel, and picking an
+  // element to attach a comment to.
 
   // Deep-link support: open the deck at #N.
   var start = parseInt((location.hash || "").slice(1), 10);

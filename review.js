@@ -60,6 +60,14 @@
   }
 
   var btn, panel, textarea, sentList, slideInfo, sendBtn, editBtn, badge, open = false, editing = false;
+  var attachBtn, hoverEl = null, attachedInfo = null;
+
+  // Elements you can pin a comment to. Hovering one (with the panel open)
+  // pops an "Attach" button; clicking it ties your next comment to that
+  // exact element so the agent changes the right thing.
+  var ATTACH_SEL = "h1,h2,h3,h4,h5,h6,p,li,blockquote,code,figure,svg,ul,ol,table," +
+    ".kicker,.figure,.label,.index,.metric,.cols,.bullets,.steps,.chart-bars,.bar-wrap," +
+    ".chart-note,.t-hero,.t-xl,.t-lg,.t-md,.divider";
 
   function init() {
     injectStyles();
@@ -144,8 +152,8 @@
         '<div class="rv-send-hint">Ctrl+Enter to send</div>' +
         '<div class="rv-sent-title">Sent for this deck</div>' +
         '<ul class="rv-sent"></ul>' +
-        '<div class="rv-hint">Comments &amp; edits → <code>review.jsonl</code>. ' +
-          'Then tell your agent: <em>“apply my review.”</em><br>' +
+        '<div class="rv-hint">Hover any element and click <strong>📌 Attach</strong> to pin a comment to it. ' +
+          'Comments &amp; edits → <code>review.jsonl</code>; then tell your agent: <em>“apply my review.”</em><br>' +
           '<kbd>R</kbd> toggle · <kbd>E</kbd> edit · <kbd>Esc</kbd> close</div>' +
       "</div>";
     document.body.appendChild(panel);
@@ -165,6 +173,8 @@
     textarea.addEventListener("keydown", function (e) {
       if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); sendComment(); }
       if (e.key === "Escape") { e.preventDefault(); close(); }
+      // Backspace in an empty box pops the attached-element chip.
+      if (e.key === "Backspace" && textarea.value === "" && attachedInfo) { e.preventDefault(); clearAttachment(); }
       e.stopPropagation();
     });
     textarea.addEventListener("keyup", function (e) { e.stopPropagation(); });
@@ -191,11 +201,14 @@
     btn.classList.add("active");
     document.body.classList.add("rv-panel-open");
     updateSlideInfo();
+    installAttachUI();
     setTimeout(function () { textarea.focus(); }, 280);
   }
 
   function close() {
     if (editing) exitEdit();
+    uninstallAttachUI();
+    clearAttachment();
     // Release focus so the deck's nav keys fire again.
     if (document.activeElement && panel.contains(document.activeElement) && document.activeElement.blur) {
       document.activeElement.blur();
@@ -217,17 +230,25 @@
     var text = textarea.value.trim();
     if (!text) { textarea.focus(); return; }
     var slide = activeSlide();
-    sendBtn.disabled = true;
-    postJSON("/__review/comment", {
+    var payload = {
       slidePath: location.pathname,
       slideIndex: activeIndex(),
       slideTitle: slideTitle(slide),
       comment: text,
-    }).then(function (res) {
+    };
+    if (attachedInfo) {
+      payload.elementId = attachedInfo.id;
+      payload.elementTag = attachedInfo.tag;
+      payload.elementClasses = attachedInfo.classes;
+      payload.elementSnippet = attachedInfo.snippet;
+    }
+    sendBtn.disabled = true;
+    postJSON("/__review/comment", payload).then(function (res) {
       sendBtn.disabled = false;
       if (res.ok) {
         textarea.value = "";
         textarea.blur();
+        clearAttachment();
         toast("Sent to agent ✓");
         refreshSent();
       } else toast("Couldn't send — is review.py running?");
@@ -253,6 +274,109 @@
                    escapeHTML(label) + "</li>";
         }).join("");
       }).catch(function () {});
+  }
+
+  // ---- attach an element to a comment ------------------------------
+  // Hover any element on the slide (panel open) → an "Attach" button pops
+  // at its corner. Click it and your next comment is pinned to that exact
+  // element, so the agent edits the right thing instead of guessing.
+  function installAttachUI() {
+    if (!attachBtn) {
+      attachBtn = document.createElement("button");
+      attachBtn.className = "rv-attach-btn";
+      attachBtn.type = "button";
+      attachBtn.innerHTML = "📌 Attach";
+      attachBtn.addEventListener("click", onAttachClick, true);
+      document.body.appendChild(attachBtn);
+    }
+    document.addEventListener("mouseover", onHover, true);
+    window.addEventListener("scroll", positionAttachBtn, true);
+    window.addEventListener("resize", positionAttachBtn);
+  }
+
+  function uninstallAttachUI() {
+    document.removeEventListener("mouseover", onHover, true);
+    window.removeEventListener("scroll", positionAttachBtn, true);
+    window.removeEventListener("resize", positionAttachBtn);
+    if (hoverEl) { hoverEl.classList.remove("rv-hover-target"); hoverEl = null; }
+    if (attachBtn) attachBtn.classList.remove("visible");
+  }
+
+  function onHover(e) {
+    // Keep the current target while the cursor is on the Attach button itself.
+    if (attachBtn && (e.target === attachBtn || attachBtn.contains(e.target))) return;
+    var slide = activeSlide();
+    var target = e.target.closest ? e.target.closest(ATTACH_SEL) : null;
+    // Only elements inside the active slide are attachable (not the panel).
+    if (target && !slide.contains(target)) target = null;
+    if (target === hoverEl) return;
+    if (hoverEl) hoverEl.classList.remove("rv-hover-target");
+    hoverEl = target;
+    if (target) { target.classList.add("rv-hover-target"); positionAttachBtn(); }
+    else if (attachBtn) attachBtn.classList.remove("visible");
+  }
+
+  function positionAttachBtn() {
+    if (!attachBtn || !hoverEl) return;
+    var r = hoverEl.getBoundingClientRect();
+    if (r.width === 0 && r.height === 0) { attachBtn.classList.remove("visible"); return; }
+    var isRtl = getComputedStyle(hoverEl).direction === "rtl";
+    attachBtn.style.top = Math.max(4, r.top - 30) + "px";
+    if (isRtl) { attachBtn.style.right = (window.innerWidth - r.right) + "px"; attachBtn.style.left = "auto"; }
+    else { attachBtn.style.left = r.left + "px"; attachBtn.style.right = "auto"; }
+    attachBtn.classList.add("visible");
+  }
+
+  function onAttachClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!hoverEl) return;
+    setAttachment(hoverEl);
+    if (!open) openPanel();
+    textarea.focus();
+  }
+
+  function setAttachment(el) {
+    var classes = (el.className || "").toString().trim().split(/\s+/)
+      .filter(function (c) { return c && c.indexOf("rv-") !== 0; }).join(" ");
+    var text = (el.textContent || "").trim().replace(/\s+/g, " ");
+    attachedInfo = {
+      id: editId(activeSlide(), el),
+      tag: el.tagName.toLowerCase(),
+      classes: classes,
+      snippet: text.slice(0, 200),
+    };
+    renderChip();
+    textarea.placeholder = "Comment on this element… (what to change and why)";
+  }
+
+  function clearAttachment() {
+    attachedInfo = null;
+    var chip = panel.querySelector(".rv-attached-chip");
+    if (chip) chip.remove();
+    if (textarea) textarea.placeholder = "Comment on this slide… (what to change and why)";
+  }
+
+  function renderChip() {
+    if (!attachedInfo) return;
+    var primary = attachedInfo.classes.split(/\s+/).filter(Boolean)[0] || "";
+    var label = attachedInfo.tag + (primary ? "." + primary : "");
+    var snip = attachedInfo.snippet.length > 56 ? attachedInfo.snippet.slice(0, 56) + "…" : attachedInfo.snippet;
+    var chip = panel.querySelector(".rv-attached-chip");
+    if (!chip) {
+      chip = document.createElement("div");
+      chip.className = "rv-attached-chip";
+      textarea.parentNode.insertBefore(chip, textarea);
+    }
+    chip.innerHTML = "";
+    var tagEl = document.createElement("span");
+    tagEl.className = "rv-chip-tag"; tagEl.textContent = "📌 " + label;
+    var snipEl = document.createElement("span");
+    snipEl.className = "rv-chip-snippet"; snipEl.textContent = snip;
+    var x = document.createElement("button");
+    x.type = "button"; x.className = "rv-chip-x"; x.title = "Remove attachment"; x.textContent = "✕";
+    x.addEventListener("click", clearAttachment);
+    chip.appendChild(tagEl); chip.appendChild(snipEl); chip.appendChild(x);
   }
 
   // ---- inline edit --------------------------------------------------
@@ -391,13 +515,24 @@
       "#review-panel .rv-hint code{background:#2a3036;padding:1px 5px;border-radius:4px}" +
       "#review-panel .rv-hint kbd{background:#2a3036;border:1px solid #3a424a;border-radius:4px;padding:0 5px;font:inherit;font-size:11px}" +
       "body.review-editing [contenteditable]{outline:2px dashed var(--accent,#7b2e39);outline-offset:3px;border-radius:3px;cursor:text}" +
+      // Attach-an-element UI.
+      ".rv-attach-btn{position:fixed;z-index:2003;display:none;align-items:center;gap:5px;padding:4px 10px;border:none;" +
+      "border-radius:7px;background:var(--accent,#7b2e39);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;" +
+      "font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.3)}" +
+      ".rv-attach-btn.visible{display:flex}" +
+      ".rv-hover-target{outline:2px dashed var(--accent,#7b2e39);outline-offset:3px;border-radius:3px}" +
+      "#review-panel .rv-attached-chip{display:flex;align-items:center;gap:7px;background:#2a3036;border:1px solid #3a424a;" +
+      "border-radius:8px;padding:6px 9px}" +
+      "#review-panel .rv-chip-tag{font-weight:700;font-size:11.5px;color:#e7a3ad;white-space:nowrap}" +
+      "#review-panel .rv-chip-snippet{flex:1 1 auto;min-width:0;font-size:11.5px;color:#9aa0a6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
+      "#review-panel .rv-chip-x{background:none;border:none;color:#9aa0a6;font-size:14px;line-height:1;cursor:pointer;padding:0 2px}" +
       ".rv-toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(12px);background:#1f2429;color:#e7e2da;" +
       "padding:10px 18px;border-radius:999px;font-family:-apple-system,sans-serif;font-size:13.5px;font-weight:500;" +
       "box-shadow:0 8px 28px rgba(0,0,0,.35);opacity:0;transition:all .28s ease;z-index:10000;pointer-events:none}" +
       ".rv-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}" +
       // Hide every review chrome in fullscreen so a recording / presentation is clean.
-      ":fullscreen .rv-toggle-btn,:fullscreen #review-panel,:fullscreen .rv-toast," +
-      ":-webkit-full-screen .rv-toggle-btn,:-webkit-full-screen #review-panel,:-webkit-full-screen .rv-toast{display:none!important}";
+      ":fullscreen .rv-toggle-btn,:fullscreen #review-panel,:fullscreen .rv-toast,:fullscreen .rv-attach-btn," +
+      ":-webkit-full-screen .rv-toggle-btn,:-webkit-full-screen #review-panel,:-webkit-full-screen .rv-toast,:-webkit-full-screen .rv-attach-btn{display:none!important}";
     document.head.appendChild(css);
   }
 })();

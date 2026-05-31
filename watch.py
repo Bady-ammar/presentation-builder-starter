@@ -85,7 +85,10 @@ def emit(rel_path: str, rec: dict):
     kind = rec.get("type", "comment")
     summary = rec.get("comment") if kind == "comment" else \
         f"edit: {rec.get('oldText', '')!r} -> {rec.get('newText', '')!r}"
-    print(f"[{rel_path}] slide {n}: {summary}")
+    where = "slide %d" % n
+    if rec.get("elementId"):
+        where += " · element %s" % rec["elementId"]
+    print(f"[{rel_path}] {where}: {summary}")
     print(json.dumps(rec, ensure_ascii=False))
     sys.stdout.flush()
 
