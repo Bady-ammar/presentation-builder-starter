@@ -69,31 +69,38 @@ The first draft is never the last. To review a deck and ask for changes:
 1. **Start the review server** from the repo root (or just ask your
    agent to): `python3 review.py`
 2. **Open the deck** at the printed address, e.g.
-   `http://localhost:8000/presentations/<name>/deck.html`. A small
-   **Review** panel appears in the corner.
+   `http://localhost:8000/presentations/<name>/deck.html`. A floating
+   **pencil button** appears top-right — click it or press **`R`** to
+   open the review panel.
 3. **Comment or edit.**
-   - Type a comment on any slide and hit **Send to agent**.
-   - Or click **Edit mode** and fix text right on the slide — small
-     typo-level fixes save straight to the file.
-4. **Apply.** Tell your agent *"apply my review."* It reads the feedback
+   - Type a comment on any slide and hit **Send to agent** (or
+     **Ctrl/Cmd+Enter**).
+   - Or press **`E`** for **Edit mode** and fix text right on the slide —
+     small typo-level fixes save straight to the file.
+4. **Apply.** If your agent is watching, it picks comments up as you send
+   them. Otherwise tell it *"apply my review"* — it reads the feedback
    (stored in `presentations/<name>/review.jsonl`), makes the changes,
    and marks each one done. Refresh the browser to see them.
 
-The review panel only shows up when the deck is served by `review.py`.
-When you open `deck.html` directly to present, it's just the slides —
-no panel, nothing extra.
+The button and panel only show up when the deck is served by `review.py`,
+and they disappear in fullscreen. When you open `deck.html` directly to
+present, it's just the slides — nothing extra.
 
 ## Controls when presenting
 
 | Key | Action |
 |-----|--------|
-| `→` / `Space` | Next (reveals bullet points one at a time, then advances) |
-| `←` | Previous |
+| `→` / `↓` / `Space` / `PageDown` | Next (reveals bullet points one at a time, then advances) |
+| `←` / `↑` / `PageUp` | Previous |
 | `Home` / `End` | First / last slide |
 | `F` | Fullscreen |
 | click | Right side = next, left side = back (flips for RTL slides) |
 
 You can also deep-link to a slide with `#5` at the end of the URL.
+
+In a review session (deck served by `review.py`) there are three more:
+`R` toggles the review panel, `E` toggles inline edit, `Esc` closes the
+panel. All review chrome is hidden in fullscreen.
 
 ## Make it yours
 

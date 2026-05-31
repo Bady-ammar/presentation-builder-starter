@@ -9,11 +9,11 @@
      <script src="deck.js"></script>
 
    Controls
-     →  Space  PageDown   next (reveals fragments first, then advances)
-     ←  PageUp             previous
-     Home / End            first / last slide
-     F                     toggle fullscreen
-     URL #3                deep-link to slide 3
+     →  ↓  Space  PageDown   next (reveals fragments first, then advances)
+     ←  ↑  PageUp            previous
+     Home / End              first / last slide
+     F                       toggle fullscreen
+     URL #3                  deep-link to slide 3
 
    No build step. No framework. Open the file in a browser.
    ============================================================ */
@@ -88,10 +88,12 @@
     if (e.target.isContentEditable || /^(input|textarea)$/i.test(e.target.tagName)) return;
     switch (e.key) {
       case "ArrowRight":
+      case "ArrowDown":
       case " ":
       case "PageDown":
         e.preventDefault(); next(); break;
       case "ArrowLeft":
+      case "ArrowUp":
       case "PageUp":
         e.preventDefault(); prev(); break;
       case "Home":
@@ -109,8 +111,9 @@
   // Tap/click the right two-thirds to advance, left third to go back.
   document.addEventListener("click", function (e) {
     if (e.target.closest("a")) return; // let links work
-    // Ignore clicks on the review overlay or while editing slide text.
-    if (e.target.closest("#review-panel") || document.body.classList.contains("review-editing")) return;
+    // Ignore clicks on the review overlay (panel or floating button) or while
+    // editing slide text.
+    if (e.target.closest("#review-panel, .rv-toggle-btn") || document.body.classList.contains("review-editing")) return;
     var dir = getComputedStyle(slides[current]).direction;
     var x = e.clientX / window.innerWidth;
     var forward = dir === "rtl" ? x < 0.34 : x > 0.34;

@@ -169,8 +169,12 @@ self-contained and easy to copy, share, or delete.
   macOS `open presentations/<name>/deck.html` · Windows
   `start presentations\<name>\deck.html` · Linux
   `xdg-open presentations/<name>/deck.html`.
-- Remind them of the controls: → / ← (or click) to move, `F` for
-  fullscreen, bullet points reveal one click at a time.
+- Remind them of the controls: → / ↓ / Space (or click) to move forward,
+  ← / ↑ to go back, `F` for fullscreen, bullet points reveal one click at
+  a time. In a review session there's also a floating pencil button
+  (top-right) — `R` toggles the review panel, `E` toggles inline edit,
+  `Esc` closes. Those review controls vanish in fullscreen, so presenting
+  is always clean.
 - To export: open in a browser and use **Print → Save as PDF**
   (the theme prints one slide per page).
 - To **review and request changes**, point them to the review server
@@ -182,36 +186,63 @@ A deck is rarely right on the first pass. The person reviews what you
 built and tells you what to change. This is the core loop — treat their
 review as the priority.
 
-How review feedback reaches you:
+### 1. Start the review server (offer to do this for them)
 
-1. The person runs the review server from the repo root:
-   `python3 review.py` (offer to start it for them). It serves the deck
-   at `http://localhost:8000/presentations/<name>/deck.html`.
-   - It needs **Python 3.7+** and has no pip dependencies. If `python3`
-     (or `python` on Windows) isn't found, help them install it before
-     continuing — macOS: the Command Line Tools prompt, or Homebrew;
-     Windows: python.org (tick "Add to PATH") or the Microsoft Store.
-     On Windows the command is usually `python review.py`.
-2. With the deck open there, a small **Review** panel appears. They can
-   comment on any slide, and use **Edit mode** to fix text inline.
-3. Everything they do is written to that deck's `review.jsonl`:
-   - `{"type":"comment", "status":"pending", "slideIndex":N, "comment":"…"}`
-     — a change they want **you** to make.
-   - `{"type":"edit", "status":"done"}` — a trivial text fix the server
-     already applied to `deck.html`. Nothing to do; it's just a log.
-   - `{"type":"edit", "status":"pending", "result":"ambiguous|not_found"}`
-     — an inline edit that couldn't be applied automatically. Apply it
-     yourself (`oldText` → `newText` on the right slide).
+Run it from the repo root, in the background, so you can keep working
+while it serves:
 
-When they say **"apply my review"** (or similar):
+```
+python3 review.py        # serves http://localhost:8000  (Ctrl-C to stop)
+```
 
-1. Read `presentations/<name>/review.jsonl`.
-2. For each record with `"status":"pending"`, make the change in
-   `deck.html` — follow the same house style, never break a slide.
-3. Mark each one done so it doesn't get re-applied: rewrite its line in
-   `review.jsonl` with `"status":"done"` (or POST `/__review/ack` with
-   the record's `slidePath` + `ts` while the server runs).
-4. Summarize what you changed and tell them to refresh the browser.
+- It needs **Python 3.7+** and has no pip dependencies. If `python3`
+  (or `python` on Windows) isn't found, help them install it first —
+  macOS: the Command Line Tools prompt, or Homebrew; Windows:
+  python.org (tick "Add to PATH") or the Microsoft Store. On Windows
+  the command is usually `python review.py`.
+- Then tell them to open the deck at
+  `http://localhost:8000/presentations/<name>/deck.html`. A floating
+  **pencil button** appears top-right; `R` (or a click) opens the review
+  panel. They comment on any slide, or use **Edit mode** (`E`) to fix
+  text inline. The button and panel disappear in fullscreen, so the same
+  deck presents clean.
+
+### 2. Watch for comments and act on them as they land
+
+Once the server is up, **don't wait to be asked** — watch the deck's
+`review.jsonl` and handle each new comment as it arrives, the way a
+reviewer expects an assistant sitting beside them to. Tail the file
+(e.g. re-read `presentations/<name>/review.jsonl` on a short interval, or
+poll `GET /__review/comments?path=/presentations/<name>/deck.html`) and
+for every record with `"status":"pending"`:
+
+1. Read the slide it points at (`slideIndex`, 0-based) in
+   `presentations/<name>/deck.html` and apply the change the comment
+   asks for — follow the existing house style, never break a slide.
+2. **Ack it** so it stops being pending: POST `/__review/ack` with the
+   record's `slidePath` + `ts` while the server runs, or rewrite that
+   line in `review.jsonl` with `"status":"done"`.
+3. Tell them what you changed and to refresh the browser.
+
+**Handle comments one at a time — finish and ack the current one before
+the next.** If you're blocked waiting on an answer, stay blocked; don't
+jump ahead.
+
+Record types you'll see in `review.jsonl`:
+- `{"type":"comment", "status":"pending", …}` — a change they want **you**
+  to make. This is the main case above.
+- `{"type":"edit", "status":"done"}` — a trivial text fix the server
+  already applied to `deck.html`. Nothing to do; it's just a log.
+- `{"type":"edit", "status":"pending", "result":"ambiguous|not_found"}` —
+  an inline edit that couldn't be applied automatically. Apply it
+  yourself (`oldText` → `newText` on the right slide), then ack it.
+
+### 3. "Apply my review" — the batch fallback
+
+If they didn't have you watching (server wasn't running, or they
+reviewed offline) and later say **"apply my review"**: read
+`presentations/<name>/review.jsonl`, make every `"status":"pending"`
+change, ack each one, then summarize and tell them to refresh.
 
 Don't invent feedback or act on records already marked `done`.
 
