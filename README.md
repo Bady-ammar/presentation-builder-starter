@@ -1,9 +1,10 @@
 # Presentation Builder Starter
 
-A tiny, no-build kit for making slide decks with an AI agent. You write
-rough notes; the agent turns them into a clean HTML presentation that
-matches a shared house style. Slides are plain HTML/CSS — they open in
-any browser and export to PDF. No frameworks, no accounts, no install.
+A tiny, no-build kit for making slide decks with an AI agent. You share
+your content however you like — usually just by telling the agent in the
+chat — and it turns that into a clean HTML presentation that matches a
+shared house style. Slides are plain HTML/CSS — they open in any browser
+and export to PDF. No frameworks, no accounts, no install.
 
 The default look is **Editorial**: a warm off-white canvas, serif
 headings, and a single muted accent. It works in both **English (LTR)**
@@ -24,7 +25,7 @@ Almost nothing — this is deliberately low-setup.
     (tick *"Add Python to PATH"*) or the Microsoft Store. Then `python`
     works in any terminal.
 - **An AI coding agent** (e.g. Claude Code) — to actually build and revise
-  the decks from your notes.
+  the decks from whatever you tell it.
 - *(Optional)* **Internet on first view** — the example fonts load from
   Google Fonts. Offline, decks fall back to clean system fonts; everything
   still works.
@@ -43,7 +44,7 @@ Python — it's purely for the review/refine step.
 | `watch.py` | Streams new comments to your agent live, and lights up the panel's **● watcher live** status. |
 | `welcome.html` | A short guided-tour deck your agent opens the first time — it teaches the controls and the review tool. |
 | `slides.html` | An example deck in both English and Arabic — your style reference. |
-| `presentations/` | One folder per presentation. Each holds its `notes.md` and the finished `deck.html` side by side. |
+| `presentations/` | One folder per presentation, holding the finished `deck.html` (the agent may keep an optional `notes.md` brief beside it). |
 
 ## Quick start
 
@@ -53,11 +54,11 @@ Python — it's purely for the review/refine step.
    setup questions (your name, default language, accent color). That
    happens once.
 3. **Ask for a presentation.** Tell the agent what you need —
-   *"Make a deck for my Q1 team update."* It creates a folder for it
-   under `presentations/` and either asks you for the content or takes
-   the notes you give it.
-4. **Get the deck.** The agent writes `deck.html` into that same
-   folder, right next to its `notes.md`.
+   *"Make a deck for my Q1 team update."* Share the content however suits
+   you: talk it through in the chat, paste some text, or point it at a
+   document. The agent asks for whatever's missing.
+4. **Get the deck.** The agent creates a folder under `presentations/`
+   and writes the finished `deck.html` there.
 5. **Present or export.** Open `deck.html` in a browser to present. To
    share as PDF, use **Print → Save as PDF**.
 
