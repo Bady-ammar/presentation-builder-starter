@@ -48,10 +48,12 @@ Python — it's purely for the review/refine step.
 ## Quick start
 
 1. **Get the kit.** Clone this repo (or download it) to your computer.
-2. **Open it with your AI agent.** Open this folder in a coding agent
-   such as Claude Code. On the first run it will greet you and ask a few
-   setup questions (your name, default language, accent color). That
-   happens once.
+2. **Open it with your AI agent and just say hello.** Open this folder in
+   a coding agent such as Claude Code. It reads `CLAUDE.md` on open and
+   **starts a short guided setup on its own** — a warm welcome, an offer
+   to show you around, and a few quick questions (your name, language,
+   accent color). You don't need to type any commands or know anything
+   technical; the agent handles all of that. This happens just once.
 3. **Ask for a presentation.** Tell the agent what you need —
    *"Make a deck for my Q1 team update."* Share the content however suits
    you: talk it through in the chat, paste some text, or point it at a

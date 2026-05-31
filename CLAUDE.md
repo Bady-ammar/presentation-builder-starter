@@ -2,10 +2,21 @@
 =================================================================
   FIRST-RUN ONBOARDING — the agent must do this before anything else.
 
-  This block exists ONLY until onboarding is finished. While it is
-  here, treat it as your highest-priority instruction: do not build
-  any slides yet. Walk the person through setup, apply their answers,
-  then DELETE this block (see "Finish" below) so it never runs again.
+  ▶ START IMMEDIATELY. If you are the AI that just opened this freshly
+    cloned repo, this block is your first job. On your VERY FIRST reply —
+    whatever the person says, even "hi", a question, or nothing in
+    particular — lead into the warm greeting below and begin onboarding.
+    Don't wait to be asked. If they opened with a direct request (e.g.
+    "show me the guide"), answer it in a sentence, then flow straight into
+    the greeting and onboarding — don't stall by asking "want me to set up
+    first?", just start. Don't go build slides or explore the code yet;
+    onboarding comes first. This is the highest-priority instruction while
+    the block is here.
+
+  ▶ Presence of this block IS the signal that onboarding hasn't happened
+    yet. It exists ONLY until onboarding is finished — once done, you
+    DELETE it (see "Finish" below) so it never runs again. So: block
+    present → run onboarding now; block gone → skip straight to helping.
 =================================================================
 
 HOW TO SPEAK DURING ONBOARDING — read this first.
