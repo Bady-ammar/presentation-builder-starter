@@ -67,7 +67,50 @@
     buildPanel();
     bindKeys();
     refreshSent();
+    refreshStatus();
     setInterval(refreshSent, 4000);
+    setInterval(refreshStatus, 4000);
+  }
+
+  // ---- watcher status pill -----------------------------------------
+  // Polls the server's /__review/health, which reports how long ago the
+  // watcher (watch.py) last checked in. Mirrors the course tool's pill so
+  // you can see whether your agent is listening live.
+  function refreshStatus() {
+    var pill = panel && panel.querySelector(".rv-status");
+    if (!pill) return;
+    fetch("/__review/health")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        pill.className = "rv-status";
+        if (!j || !j.ok) {
+          pill.classList.add("offline"); pill.textContent = "⚠ server down";
+          pill.title = "Can't reach review.py."; return;
+        }
+        var L = j.listener || {};
+        var age = L.last_seen_seconds_ago;
+        if (age === null || age === undefined) {
+          pill.classList.add("offline");
+          pill.textContent = "⚠ no watcher";
+          pill.title = "Comments are saved, but no watcher is running — your agent isn't listening live. Start one with: python3 watch.py";
+        } else if (age < 45) {
+          pill.classList.add("live");
+          pill.textContent = "● watcher live";
+          pill.title = "Heartbeat " + Math.round(age) + "s ago. Comments stream to your agent as you send them.";
+        } else if (age < 300) {
+          pill.classList.add("stale");
+          pill.textContent = "⚠ watcher stale";
+          pill.title = "Watcher went quiet " + Math.round(age) + "s ago — it may have stopped.";
+        } else {
+          pill.classList.add("offline");
+          pill.textContent = "⚠ no watcher";
+          pill.title = "Last heartbeat " + Math.round(age) + "s ago — treat as stopped.";
+        }
+      })
+      .catch(function () {
+        pill.className = "rv-status offline";
+        pill.textContent = "⚠ server down";
+      });
   }
 
   // ---- floating toggle button --------------------------------------
@@ -87,7 +130,8 @@
     panel.id = "review-panel";
     panel.innerHTML =
       '<div class="rv-head">' +
-        '<span class="rv-dot"></span><h3>Review</h3>' +
+        '<h3>Review</h3>' +
+        '<span class="rv-status unknown" title="Watcher status">checking…</span>' +
         '<button class="rv-close" title="Close (Esc)">&times;</button>' +
       "</div>" +
       '<div class="rv-body">' +
@@ -317,7 +361,12 @@
       "body.rv-panel-open #deck{inset-inline-end:340px}" +
       "#review-panel .rv-head{display:flex;align-items:center;gap:8px;padding:14px 16px;background:#171b1f}" +
       "#review-panel .rv-head h3{margin:0;font-size:1.05em;font-weight:600}" +
-      "#review-panel .rv-dot{width:8px;height:8px;border-radius:50%;background:#6fcf97;box-shadow:0 0 8px #6fcf97}" +
+      "#review-panel .rv-status{flex:1 1 auto;min-width:0;font-size:.72em;font-weight:600;letter-spacing:.3px;" +
+      "padding:3px 9px;border-radius:999px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}" +
+      "#review-panel .rv-status.unknown{background:#2a3036;color:#9aa0a6}" +
+      "#review-panel .rv-status.live{background:#16331f;color:#6fcf97}" +
+      "#review-panel .rv-status.stale{background:#4a3a12;color:#f0c453}" +
+      "#review-panel .rv-status.offline{background:#3a1f22;color:#f0928a}" +
       "#review-panel .rv-close{margin-left:auto;background:none;border:none;color:#9aa0a6;font-size:24px;line-height:1;cursor:pointer;padding:0 4px}" +
       "#review-panel .rv-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px;overflow:auto}" +
       "#review-panel .rv-slide-info{font-size:12px;color:#9aa0a6;border-bottom:1px solid #2d343b;padding-bottom:8px}" +

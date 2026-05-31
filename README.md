@@ -40,6 +40,8 @@ Python — it's purely for the review/refine step.
 | `theme.css` | The whole visual system. Recolor the deck by editing the tokens at the top. |
 | `deck.js` | The slide engine (keyboard nav + click-to-advance + fragments). |
 | `review.js` · `review.py` | The review + edit tool. Lets you comment on slides and fix text inline; your agent reads the feedback and applies it. |
+| `watch.py` | Streams new comments to your agent live, and lights up the panel's **● watcher live** status. |
+| `welcome.html` | A short guided-tour deck your agent opens the first time — it teaches the controls and the review tool. |
 | `slides.html` | An example deck in both English and Arabic — your style reference. |
 | `presentations/` | One folder per presentation. Each holds its `notes.md` and the finished `deck.html` side by side. |
 
@@ -77,10 +79,12 @@ The first draft is never the last. To review a deck and ask for changes:
      **Ctrl/Cmd+Enter**).
    - Or press **`E`** for **Edit mode** and fix text right on the slide —
      small typo-level fixes save straight to the file.
-4. **Apply.** If your agent is watching, it picks comments up as you send
-   them. Otherwise tell it *"apply my review"* — it reads the feedback
-   (stored in `presentations/<name>/review.jsonl`), makes the changes,
-   and marks each one done. Refresh the browser to see them.
+4. **Apply.** For a live loop, have your agent run `python3 watch.py` — it
+   picks comments up as you send them, and the panel shows a green
+   **● watcher live** badge so you know it's listening. Otherwise just tell
+   it *"apply my review"* — it reads the feedback (stored in
+   `presentations/<name>/review.jsonl`), makes the changes, and marks each
+   one done. Refresh the browser to see them.
 
 The button and panel only show up when the deck is served by `review.py`,
 and they disappear in fullscreen. When you open `deck.html` directly to

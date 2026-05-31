@@ -22,12 +22,20 @@ from __future__ import annotations  # keep type hints lazy so Python 3.7+ works
 
 import json
 import sys
+import threading
+import time
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs, unquote
 
 ROOT = Path(__file__).resolve().parent
+
+# Last time the watcher (watch.py) checked in, as epoch seconds. The review
+# panel polls /__review/health and turns this into a "watcher live" pill so
+# you can see at a glance whether your agent is listening. None = never seen.
+_HB_LOCK = threading.Lock()
+_LAST_HEARTBEAT = None
 
 CONTENT_TYPES = {
     ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8",
@@ -92,7 +100,11 @@ class Handler(BaseHTTPRequestHandler):
         path = parsed.path
 
         if path == "/__review/health":
-            return self._json(200, {"ok": True, "root": str(ROOT)})
+            with _HB_LOCK:
+                last = _LAST_HEARTBEAT
+            age = None if last is None else round(time.time() - last, 1)
+            return self._json(200, {"ok": True, "root": str(ROOT),
+                                    "listener": {"last_seen_seconds_ago": age}})
 
         if path == "/__review/comments":
             q = parse_qs(parsed.query)
@@ -113,6 +125,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._post_edit(body)
             if path == "/__review/ack":
                 return self._post_ack(body)
+            if path == "/__review/heartbeat":
+                return self._post_heartbeat(body)
             return self._json(404, {"error": "unknown_endpoint"})
         except Exception as e:  # never crash the server on a bad request
             return self._json(500, {"error": "server_error", "reason": str(e)})
@@ -233,6 +247,13 @@ class Handler(BaseHTTPRequestHandler):
         f.write_text("\n".join(lines) + "\n", encoding="utf-8")
         return self._json(200, {"ok": True})
 
+    def _post_heartbeat(self, body):
+        # The watcher (watch.py) pings this every few seconds while it's alive.
+        global _LAST_HEARTBEAT
+        with _HB_LOCK:
+            _LAST_HEARTBEAT = time.time()
+        return self._json(200, {"ok": True})
+
 
 def main():
     port = 8000
@@ -249,6 +270,8 @@ def main():
     print(f"    {base}/presentations/<name>/deck.html      (one you built)\n")
     print("  Comment on a slide or use Edit mode; both land in that")
     print("  deck's review.jsonl. Then tell your agent: \"apply my review.\"\n")
+    print("  For live review (agent acts as you send each comment), also run:")
+    print(f"    python3 watch.py {port if port != 8000 else ''}".rstrip() + "\n")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

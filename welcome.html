@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Welcome — Presentation Studio</title>
+
+<!-- Same fonts + theme as every deck you'll build. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600&family=Noto+Sans+Arabic:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+
+<!-- A few extra rules ONLY for this tutorial's animated charts. Your own
+     decks don't need these — they're here to show what a slide can hold. -->
+<style>
+  .chart-bars { display: flex; align-items: flex-end; gap: clamp(12px, 2vw, 26px); height: clamp(220px, 34vh, 320px); margin-top: 36px; }
+  .bar-wrap   { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .bar        { width: 100%; max-width: 90px; height: 0; min-height: 4px; border-radius: 10px 10px 0 0;
+                background: linear-gradient(to top, var(--accent), var(--accent-soft));
+                transition: height .9s cubic-bezier(.2,.8,.2,1); position: relative; }
+  .bar-val    { position: absolute; top: -28px; left: 0; right: 0; text-align: center;
+                font-family: var(--serif); font-weight: 600; color: var(--accent); font-size: 1.1rem; }
+  .bar-label  { margin-top: 12px; font-size: clamp(.85rem, 1.3vw, 1.05rem); color: var(--ink-soft); }
+  .line-chart { width: 100%; height: auto; margin-top: 26px; display: block; }
+  .line-path  { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .line-dot   { fill: var(--accent); }
+  .line-area  { fill: var(--accent); opacity: 0; }
+  .chart-note { font-size: clamp(.85rem, 1.3vw, 1rem); color: var(--ink-faint); margin-top: 18px; }
+  .key        { display: inline-block; min-width: 1.9em; text-align: center; font-family: var(--sans);
+                font-weight: 600; font-size: .9em; color: var(--accent); background: rgba(123,46,57,.08);
+                border: 1px solid var(--rule); border-radius: 6px; padding: 2px 8px; }
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+  <!-- 1 · Cover -->
+  <section class="slide slide-title" dir="ltr">
+    <p class="kicker">Your presentation studio</p>
+    <h1 class="t-hero">Welcome.</h1>
+    <hr class="divider">
+    <p class="t-md">This short deck is also a tour. It shows you how to move
+      around, leave feedback, and fix things — using the very tools you'll use
+      on every deck I build for you.</p>
+    <p class="t-sm mt-md">Press <span class="key">→</span> or click the right side to begin.</p>
+  </section>
+
+  <!-- 2 · Navigation -->
+  <section class="slide" dir="ltr">
+    <p class="kicker">Getting around</p>
+    <h2 class="t-lg">Move through the deck</h2>
+    <ul class="bullets mt-md">
+      <li class="fragment"><span class="key">→</span> <span class="key">↓</span> <span class="key">Space</span> — next (and reveal points like these one at a time)</li>
+      <li class="fragment"><span class="key">←</span> <span class="key">↑</span> — back</li>
+      <li class="fragment"><span class="key">F</span> — fullscreen, for presenting and recording</li>
+      <li class="fragment"><span class="key">Home</span> <span class="key">End</span> — jump to the first or last slide</li>
+      <li class="fragment"><strong>Click</strong> the right two-thirds to go forward, the left third to go back (it flips for Arabic slides)</li>
+    </ul>
+  </section>
+
+  <!-- 3 · Bar chart (animated, random) -->
+  <section class="slide" dir="ltr">
+    <p class="kicker">Slides can show live data</p>
+    <h2 class="t-lg">Not just text — visuals too</h2>
+    <div class="chart-bars" data-bars>
+      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">Mon</div></div>
+      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">Tue</div></div>
+      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">Wed</div></div>
+      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">Thu</div></div>
+      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">Fri</div></div>
+      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">Sat</div></div>
+    </div>
+    <p class="chart-note">Sample data, re-rolled every time you land on this slide. A deck is plain HTML, so it can hold charts, metrics, diagrams — anything a browser can draw.</p>
+  </section>
+
+  <!-- 4 · Line chart (animated, random) -->
+  <section class="slide" dir="ltr">
+    <p class="kicker">…and trends over time</p>
+    <h2 class="t-lg">Drawn fresh, right on the slide</h2>
+    <svg class="line-chart" data-line viewBox="0 0 600 240" preserveAspectRatio="xMidYMid meet" role="img" aria-label="An example trend line">
+      <path class="line-area"></path>
+      <path class="line-path"></path>
+    </svg>
+    <p class="chart-note">Same idea, different shape — random points each visit. When you ask me for a deck, I build visuals like these from your real numbers.</p>
+  </section>
+
+  <!-- 5 · Review tool -->
+  <section class="slide" dir="ltr">
+    <p class="kicker">Tell me what to change</p>
+    <h2 class="t-lg">Review, right on the slide <span class="key">R</span></h2>
+    <ul class="bullets mt-md">
+      <li class="fragment">See the round <strong>pencil button</strong> at the top-right? Click it — or press <span class="key">R</span> — to open the review panel.</li>
+      <li class="fragment">Type what you'd like changed on this slide and hit <strong>Send to agent</strong> (or <span class="key">Ctrl</span>+<span class="key">Enter</span>).</li>
+      <li class="fragment">A green <strong>● watcher live</strong> badge means I'm listening — your comment reaches me the moment you send it.</li>
+      <li class="fragment"><strong>Try it now:</strong> open the panel and leave a comment on this slide.</li>
+    </ul>
+  </section>
+
+  <!-- 6 · Edit mode -->
+  <section class="slide" dir="ltr">
+    <p class="kicker">Fix small things yourself</p>
+    <h2 class="t-lg">Edit text inline <span class="key">E</span></h2>
+    <ul class="bullets mt-md">
+      <li class="fragment">Press <span class="key">E</span> (or the <strong>Edit mode</strong> button) to make the text editable.</li>
+      <li class="fragment">Click any line, fix the typo, then click away — small fixes save straight to the file.</li>
+      <li class="fragment">Anything bigger? Leave it as a comment instead, and I'll handle it.</li>
+      <li class="fragment">Press <span class="key">Esc</span> to leave edit mode or close the panel.</li>
+    </ul>
+  </section>
+
+  <!-- 7 · Clean to present -->
+  <section class="slide slide-statement" dir="ltr">
+    <p class="kicker">When it's ready</p>
+    <p class="t-xl">Press <span class="key" style="font-size:.7em">F</span> and the review tools vanish.<br>The deck you reviewed is the deck you present — and the PDF you export.</p>
+  </section>
+
+  <!-- 8 · How to start -->
+  <section class="slide" dir="ltr">
+    <p class="kicker">The loop</p>
+    <h2 class="t-lg">Making a deck with me</h2>
+    <ol class="steps mt-md">
+      <li class="fragment">Tell me what you need — <em>"a deck for my Q1 update."</em></li>
+      <li class="fragment">I draft it from your notes into its own folder under <code>presentations/</code>.</li>
+      <li class="fragment">You review it with the tools you just learned; I revise until it's right.</li>
+    </ol>
+  </section>
+
+  <!-- 9 · Closing -->
+  <section class="slide slide-title" dir="ltr">
+    <p class="kicker">Your turn</p>
+    <h1 class="t-hero">Ready when you are.</h1>
+    <p class="t-md mt-md">Tell me about your first presentation — or ask me to finish setting things up.</p>
+  </section>
+
+</div><!-- #deck -->
+
+<div class="deck-footer">Welcome · Presentation Studio</div>
+
+<script src="deck.js"></script>
+<script src="review.js"></script>
+
+<!-- Tutorial-only: re-roll the charts each time their slide becomes active.
+     Plain DOM + a MutationObserver — no library, nothing your decks need. -->
+<script>
+(function () {
+  function rand(min, max) { return Math.round(min + Math.random() * (max - min)); }
+
+  function renderBars(slide) {
+    var wrap = slide.querySelector('[data-bars]');
+    if (!wrap) return;
+    wrap.querySelectorAll('.bar').forEach(function (bar) {
+      var v = rand(25, 100);
+      var val = bar.querySelector('.bar-val');
+      if (val) val.textContent = v;
+      bar.style.transition = 'none';
+      bar.style.height = '0%';
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          bar.style.transition = 'height .9s cubic-bezier(.2,.8,.2,1)';
+          bar.style.height = v + '%';
+        });
+      });
+    });
+  }
+
+  function renderLine(slide) {
+    var svg = slide.querySelector('[data-line]');
+    if (!svg) return;
+    var path = svg.querySelector('.line-path');
+    var area = svg.querySelector('.line-area');
+    var W = 600, H = 240, pad = 16, n = 7;
+    var pts = [];
+    for (var i = 0; i < n; i++) {
+      var x = pad + i * (W - 2 * pad) / (n - 1);
+      var y = pad + Math.random() * (H - 2 * pad);
+      pts.push([x, y]);
+    }
+    var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ');
+    path.setAttribute('d', d);
+    area.setAttribute('d', d + ' L' + (W - pad) + ' ' + (H - pad) + ' L' + pad + ' ' + (H - pad) + ' Z');
+
+    // existing dots, redrawn
+    svg.querySelectorAll('.line-dot').forEach(function (c) { c.remove(); });
+    var NS = 'http://www.w3.org/2000/svg';
+    pts.forEach(function (p) {
+      var c = document.createElementNS(NS, 'circle');
+      c.setAttribute('class', 'line-dot');
+      c.setAttribute('cx', p[0].toFixed(1)); c.setAttribute('cy', p[1].toFixed(1)); c.setAttribute('r', '4');
+      svg.appendChild(c);
+    });
+
+    var len = path.getTotalLength();
+    path.style.transition = 'none';
+    path.style.strokeDasharray = len;
+    path.style.strokeDashoffset = len;
+    area.style.transition = 'none';
+    area.style.opacity = '0';
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        path.style.transition = 'stroke-dashoffset 1.1s ease';
+        path.style.strokeDashoffset = '0';
+        area.style.transition = 'opacity 1.1s ease';
+        area.style.opacity = '.16';
+      });
+    });
+  }
+
+  function render(slide) { renderBars(slide); renderLine(slide); }
+
+  var obs = new MutationObserver(function (muts) {
+    muts.forEach(function (m) {
+      if (m.attributeName === 'class' && m.target.classList.contains('active')) render(m.target);
+    });
+  });
+  document.querySelectorAll('.slide').forEach(function (s) { obs.observe(s, { attributes: true }); });
+
+  var active = document.querySelector('.slide.active');
+  if (active) render(active);
+})();
+</script>
+</body>
+</html>

@@ -13,21 +13,40 @@ Greet them warmly and briefly — one short paragraph — then explain
 that you'll ask a few quick questions to set the deck up the way they
 like.
 
-FIRST, show them what they're working with. Before the questions,
-offer to open the example deck so they can *see* the house style:
+FIRST, give them the guided tour. Before the questions, offer to open the
+welcome deck — it teaches the whole workflow (navigation, the commenting
+tool, edit mode, fullscreen) on its own slides, with live animated charts
+so they see what a deck can do:
 
-  "Want me to open the example deck so you can see the look first?
-   It's `slides.html` — it'll open in your browser."
+  "Want a quick tour first? I'll open a short welcome deck that shows you
+   how everything works — you can even leave a comment on it to see the
+   review loop live."
 
-If they say yes, open `slides.html` in their default browser with the
-command for their OS (it's a plain file — no server needed):
-  - macOS:   `open slides.html`
-  - Windows: `start slides.html`
-  - Linux:   `xdg-open slides.html`
-Tell them to use → / ← (or click) to move through the slides, and that
-it scrolls through both an English and an Arabic example. Then come
-back and continue with the questions below — seeing the burgundy
+If they say yes, open it **through the review server** so the commenting
+tool is awake and they can try it for real:
+
+1. Start the server in the background from the repo root: `python3 review.py`
+   (needs Python 3.7+ — see the requirements note in the review section if
+   it's missing).
+2. Start the watcher in the background too: `python3 watch.py`. This is what
+   makes the deck's status badge turn green (**● watcher live**) and streams
+   any comment they leave straight to you.
+3. Open `http://localhost:8000/welcome.html` in their default browser:
+   - macOS: `open http://localhost:8000/welcome.html`
+   - Windows: `start http://localhost:8000/welcome.html`
+   - Linux: `xdg-open http://localhost:8000/welcome.html`
+
+Tell them to walk it with `→` / `←` (or click), and that the deck itself
+explains the pencil button (`R`), edit mode (`E`), and fullscreen (`F`).
+**Encourage them to actually leave a comment** on the "Review" slide — when
+they do, it'll arrive in your session via `watch.py`; acknowledge it warmly
+("got your comment — that's exactly how it works") so the loop feels real.
+Then come back and continue with the questions below — seeing the burgundy
 accent and serif headings first makes question 3 (the look) concrete.
+
+(`slides.html` is the fuller English+Arabic style reference — point them
+there too if they want to see every slide type. You'll read it later when
+building their decks.)
 
 Ask the questions ONE AT A TIME (wait for each answer):
 
@@ -93,6 +112,8 @@ finished decks, then help refine them.
 ├── deck.js              ← the slide engine (keyboard nav, fragments) — don't edit
 ├── review.js            ← the review + edit overlay — don't edit
 ├── review.py            ← the local review server the person runs — don't edit
+├── watch.py             ← streams new comments to you live — don't edit
+├── welcome.html         ← the guided-tour deck shown at onboarding
 ├── slides.html          ← the EXAMPLE deck — your style reference, do not overwrite
 └── presentations/       ← one folder per presentation
     └── example/
@@ -209,24 +230,35 @@ python3 review.py        # serves http://localhost:8000  (Ctrl-C to stop)
 
 ### 2. Watch for comments and act on them as they land
 
-Once the server is up, **don't wait to be asked** — watch the deck's
-`review.jsonl` and handle each new comment as it arrives, the way a
-reviewer expects an assistant sitting beside them to. Tail the file
-(e.g. re-read `presentations/<name>/review.jsonl` on a short interval, or
-poll `GET /__review/comments?path=/presentations/<name>/deck.html`) and
-for every record with `"status":"pending"`:
+Once the server is up, **don't wait to be asked** — start the watcher and
+handle each comment as it arrives, the way a reviewer expects an assistant
+sitting beside them to. Run it in the background from the repo root:
+
+```
+python3 watch.py        # add the port if review.py isn't on 8000
+```
+
+`watch.py` tails every `review.jsonl`, prints each new **pending** comment
+as a two-line block (a `[path] slide N: …` header + the raw JSON), and
+pings the server so the review panel shows a green **● watcher live**
+status. For each block it prints:
 
 1. Read the slide it points at (`slideIndex`, 0-based) in
    `presentations/<name>/deck.html` and apply the change the comment
    asks for — follow the existing house style, never break a slide.
-2. **Ack it** so it stops being pending: POST `/__review/ack` with the
-   record's `slidePath` + `ts` while the server runs, or rewrite that
-   line in `review.jsonl` with `"status":"done"`.
+2. **Ack it** so it stops being pending and the panel flips it to
+   `done ✓`: POST `/__review/ack` with the record's `slidePath` + `ts`,
+   or rewrite that line in `review.jsonl` with `"status":"done"`.
 3. Tell them what you changed and to refresh the browser.
 
 **Handle comments one at a time — finish and ack the current one before
 the next.** If you're blocked waiting on an answer, stay blocked; don't
 jump ahead.
+
+If you can't keep a watcher running, you can instead poll
+`GET /__review/comments?path=/presentations/<name>/deck.html` yourself —
+but `watch.py` is the intended path, and it's what lights up the status
+pill in the panel.
 
 Record types you'll see in `review.jsonl`:
 - `{"type":"comment", "status":"pending", …}` — a change they want **you**
