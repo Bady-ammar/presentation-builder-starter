@@ -147,8 +147,8 @@
     <div class="playground"></div>
     <div class="pg-caption">
       <p class="kicker">تفاعليّة بلا حدود</p>
-      <p class="t-xl">حرّك الفأرة هنا… وانقر.</p>
-      <p class="t-md" style="color:#C9BCAE">الشريحة صفحة ويب كاملة — يمكنها أن تتفاعل، لا أن تُعرض فحسب.</p>
+      <p class="t-xl">حرّك الفأرة هنا… وانقر. 🔊</p>
+      <p class="t-md" style="color:#C9BCAE">حركةٌ وصوتٌ وألوان — الشريحة صفحة ويب كاملة، تتفاعل ولا تُعرض فحسب. (ارفع صوت جهازك.)</p>
     </div>
   </section>
 
@@ -235,6 +235,34 @@
 (function () {
   function rand(min, max) { return Math.round(min + Math.random() * (max - min)); }
 
+  // —— Sound effects, synthesized with the Web Audio API (no audio files). ——
+  // Browsers only allow sound after a user gesture, so the context is created
+  // lazily and resumed on each play; before the first click/key it stays quiet.
+  var AC = null;
+  function audio() {
+    if (AC === null) {
+      try { AC = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch (e) { AC = false; }
+    }
+    if (AC && AC.state === 'suspended' && AC.resume) AC.resume();
+    return AC || null;
+  }
+  function tone(freq, whenOffset, dur, type, peak) {
+    var ac = audio(); if (!ac) return;
+    var t0 = ac.currentTime + (whenOffset || 0);
+    var osc = ac.createOscillator(), g = ac.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, t0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(peak || 0.12, t0 + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0006, t0 + dur);
+    osc.connect(g); g.connect(ac.destination);
+    osc.start(t0); osc.stop(t0 + dur + 0.03);
+  }
+  function chord(freqs, type, peak, stagger) {
+    freqs.forEach(function (f, i) { tone(f, i * (stagger || 0.06), 0.45, type || 'triangle', peak || 0.1); });
+  }
+
   function renderBars(slide) {
     var wrap = slide.querySelector('[data-bars]');
     if (!wrap) return;
@@ -300,7 +328,7 @@
     var layer = slide.querySelector('.confetti-layer');
     if (!layer) return;
     layer.innerHTML = '';
-    var colors = ['#7B2E39', '#A8505C', '#E4B363', '#6FCF97', '#5B8DEF', '#F2E9DC', '#E07A5F'];
+    var colors = ['#FF812C', '#FFA559', '#E4B363', '#6FCF97', '#5B8DEF', '#F4EFE9', '#E07A5F'];
     var shapes = ['', '50%', '0'];  // square, circle, square — varied via border-radius
     for (var i = 0; i < 120; i++) {
       var c = document.createElement('div');
@@ -317,6 +345,9 @@
       c.style.animationDelay = (rand(0, 30) / 10) + 's, 0s';
       layer.appendChild(c);
     }
+    // A short rising fanfare to land the celebration (quiet if audio is still
+    // locked — i.e. the person hasn't interacted yet).
+    chord([523.25, 659.25, 783.99, 1046.5, 1318.5], 'triangle', 0.12, 0.09);
   }
 
   function render(slide) { renderBars(slide); renderLine(slide); renderConfetti(slide); }
@@ -336,7 +367,8 @@
     var pg = document.querySelector('[data-playground] .playground');
     if (!pg) return;
     var colors = ['#FF812C', '#FFA559', '#6FCF97', '#5B8DEF', '#E4B363', '#E07A5F', '#F4EFE9'];
-    var last = 0;
+    var PENTA = [523.25, 587.33, 659.25, 783.99, 880, 1046.5];  // a soft pentatonic scale
+    var last = 0, soundLast = 0;
     function dot(x, y, size, dx, dy, life) {
       var d = document.createElement('div');
       d.className = 'pg-dot';
@@ -355,14 +387,25 @@
       });
     }
     pg.addEventListener('pointermove', function (e) {
-      var now = Date.now(); if (now - last < 24) return; last = now;
-      dot(e.clientX - 6, e.clientY - 6, rand(8, 16), rand(-30, 30), rand(-90, -40), rand(600, 1100));
+      var now = Date.now();
+      if (now - last >= 24) {
+        last = now;
+        dot(e.clientX - 6, e.clientY - 6, rand(8, 16), rand(-30, 30), rand(-90, -40), rand(600, 1100));
+      }
+      // A soft sparkle blip — throttled more than the dots so it doesn't buzz.
+      if (now - soundLast >= 110) {
+        soundLast = now;
+        tone(PENTA[Math.floor(Math.random() * PENTA.length)] * 2, 0, 0.13, 'triangle', 0.05);
+      }
     });
     pg.addEventListener('click', function (e) {
       for (var i = 0; i < 18; i++) {
         var ang = Math.PI * 2 * i / 18, r = rand(60, 170);
         dot(e.clientX - 7, e.clientY - 7, rand(9, 18), Math.cos(ang) * r, Math.sin(ang) * r, rand(700, 1200));
       }
+      // A satisfying pop: a low thump + a quick bright arpeggio.
+      tone(150, 0, 0.18, 'sine', 0.16);
+      chord([523.25, 659.25, 783.99, 1046.5], 'triangle', 0.13, 0.045);
     });
   })();
 })();
