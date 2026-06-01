@@ -280,6 +280,15 @@ hands-free.** Run, from the repo root, in the background:
 python3 watch.py --wait        # add the port if review.py isn't on 8000
 ```
 
+> **Where it lives:** `watch.py` (and `review.py`) sit at the **repo root**,
+> next to `CLAUDE.md` — NOT inside `presentations/`. There is one watcher for
+> the whole kit; it watches every presentation at once. If your shell has
+> wandered into a deck folder, `cd` back to the repo root first. Run exactly
+> `python3 watch.py --wait` — never `presentations/watch.py` or a path that
+> includes `presentations/` (that file doesn't exist and you'll get
+> "No such file or directory"). When in doubt, pass the repo-root path
+> explicitly (e.g. `python3 /abs/path/to/repo/watch.py --wait`).
+
 Here's the key idea: a background process only notifies you **when it
 finishes**. A watcher that runs forever never finishes, so it would never
 wake you — you'd only see comments if the person pinged you. `--wait`
