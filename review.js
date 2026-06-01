@@ -78,6 +78,16 @@
     refreshStatus();
     setInterval(refreshSent, 4000);
     setInterval(refreshStatus, 4000);
+    // In fullscreen the panel is hidden, so the deck shouldn't stay shifted.
+    // Drop the reserve class on enter; restore it on exit if the panel's open.
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+  }
+
+  function onFullscreenChange() {
+    var fs = document.fullscreenElement || document.webkitFullscreenElement;
+    if (fs) document.body.classList.remove("rv-panel-open");
+    else if (open) document.body.classList.add("rv-panel-open");
   }
 
   // ---- watcher status pill -----------------------------------------
@@ -592,7 +602,9 @@
       ":-webkit-full-screen .rv-toggle-btn,:-webkit-full-screen #review-panel,:-webkit-full-screen .rv-toast,:-webkit-full-screen .rv-attach-btn{display:none!important}" +
       // …and since the panel is hidden in fullscreen, stop reserving space for it —
       // otherwise the deck stays shifted left as if the panel were still open.
-      ":fullscreen #deck,:-webkit-full-screen #deck{right:0!important}";
+      // Must out-specify `body.rv-panel-open #deck{right:340px}` (which is still
+      // set in fullscreen since the class stays) — so scope to that same class.
+      ":fullscreen body.rv-panel-open #deck,:-webkit-full-screen body.rv-panel-open #deck{right:0!important}";
     document.head.appendChild(css);
   }
 })();
