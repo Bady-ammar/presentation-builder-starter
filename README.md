@@ -6,8 +6,9 @@ chat — and it turns that into a clean HTML presentation that matches a
 shared house style. Slides are plain HTML/CSS — they open in any browser
 and export to PDF. No frameworks, no accounts, no install.
 
-The default look is **Editorial**: a warm off-white canvas, serif
-headings, and a single muted accent. It works in both **English (LTR)**
+The default look is the **Extend Academy** theme: a warm near-white canvas,
+clean IBM Plex Sans Arabic type, a bright orange accent, and the Extend
+Academy logo in the corner. It works in both **English (LTR)**
 and **Arabic (RTL)** — set the direction per slide.
 
 ## What you need
@@ -113,8 +114,13 @@ chrome is hidden in fullscreen.
 
 ## Make it yours
 
-- **Recolor:** edit the `--accent` (and other tokens) at the top of
+The simplest way is to **just ask your agent** — *"recolor the deck to our
+brand blue"* or *"use our logo instead."* Or do it by hand:
+
+- **Recolor:** edit `--accent` (and other tokens) at the top of
   `theme.css`. One change repaints the whole deck.
+- **Logo:** replace `assets/extend-academy-logo.png` (or point the
+  `.deck-logo` `<img>` at your own file, or remove it).
 - **Fonts:** swap the Google Fonts `<link>` in your slide file's
   `<head>` and the `--serif` / `--sans` tokens in `theme.css`.
 - **New slide types:** add a clearly-commented block at the bottom of

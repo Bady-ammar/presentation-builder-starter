@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Welcome — Presentation Studio</title>
+<title>مرحبًا — استوديو العروض</title>
 
 <!-- Same fonts + theme as every deck you'll build. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600&family=Noto+Sans+Arabic:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="theme.css">
 
 <!-- A few extra rules ONLY for this tutorial's animated charts. Your own
@@ -28,149 +28,203 @@
   .line-area  { fill: var(--accent); opacity: 0; }
   .chart-note { font-size: clamp(.85rem, 1.3vw, 1rem); color: var(--ink-faint); margin-top: 18px; }
   .key        { display: inline-block; min-width: 1.9em; text-align: center; font-family: var(--sans);
-                font-weight: 600; font-size: .9em; color: var(--accent); background: rgba(123,46,57,.08);
+                font-weight: 600; font-size: .9em; color: var(--accent); background: rgba(255,129,44,.12);
                 border: 1px solid var(--rule); border-radius: 6px; padding: 2px 8px; }
+
+  /* —— Excessive celebration slide —— */
+  .slide-celebrate { background: var(--bg-ink); justify-content: center; align-items: center; text-align: center; overflow: hidden; }
+  .celebrate-burst { font-size: clamp(3rem, 9vw, 6rem); line-height: 1; animation: cel-pop .6s cubic-bezier(.2,1.4,.4,1) both; }
+  .celebrate-title { font-family: var(--serif); font-weight: 600; color: var(--on-ink); font-size: clamp(2.4rem, 6vw, 4.4rem);
+                     margin-top: 18px; animation: cel-pulse 1.1s ease-in-out infinite; }
+  .celebrate-sub   { color: #C9BCAE; font-size: clamp(1.1rem, 2vw, 1.5rem); margin-top: 14px; }
+  .celebrate-emojis { margin-top: 26px; display: flex; gap: clamp(10px, 2vw, 22px); justify-content: center; }
+  .celebrate-emojis span { font-size: clamp(2rem, 5vw, 3.4rem); display: inline-block; animation: cel-bounce 1s ease-in-out infinite; }
+  .celebrate-emojis span:nth-child(2) { animation-delay: .1s; }
+  .celebrate-emojis span:nth-child(3) { animation-delay: .2s; }
+  .celebrate-emojis span:nth-child(4) { animation-delay: .3s; }
+  .celebrate-emojis span:nth-child(5) { animation-delay: .4s; }
+  /* Confetti pieces are injected into .confetti-layer on slide activation. */
+  .confetti-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .confetti { position: absolute; top: -12vh; width: 12px; height: 12px; opacity: .95;
+              animation: cel-fall linear forwards, cel-spin linear infinite; }
+  @keyframes cel-pop   { from { transform: scale(0) rotate(-25deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+  @keyframes cel-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+  @keyframes cel-bounce{ 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-26px) rotate(6deg); } }
+  @keyframes cel-fall  { to { transform: translateY(120vh); } }
+  @keyframes cel-spin  { to { transform: rotate(360deg); } }
+
+  /* —— Interactive playground slide —— */
+  .playground { position: absolute; inset: 0; cursor: crosshair; overflow: hidden; }
+  .pg-caption { position: relative; z-index: 2; pointer-events: none; text-align: center; }
+  .pg-dot { position: fixed; top: 0; left: 0; pointer-events: none; border-radius: 50%;
+            z-index: 6; will-change: transform, opacity; }
 </style>
 </head>
 <body>
 
+<!-- Brand mark — shows on every slide. Swap the src or ask Claude to rebrand. -->
+<img class="deck-logo" src="assets/extend-academy-logo.png" alt="Extend Academy">
+
 <div id="deck">
 
-  <!-- 1 · Cover -->
-  <section class="slide slide-title" dir="ltr">
-    <p class="kicker">Your presentation studio</p>
-    <h1 class="t-hero">Welcome.</h1>
+  <!-- 1 · الغلاف -->
+  <section class="slide slide-title" dir="rtl">
+    <p class="kicker">استوديو العروض</p>
+    <h1 class="t-hero">مرحبًا.</h1>
     <hr class="divider">
-    <p class="t-md">This short deck is also a tour. It shows you how to move
-      around, leave feedback, and fix things — using the very tools you'll use
-      on every deck I build for you.</p>
-    <p class="t-sm mt-md">Press <span class="key">→</span> to begin.</p>
+    <p class="t-md">هذا العرض القصير جولةٌ أيضًا. يريك كيف تتنقّل، وكيف تترك
+      ملاحظاتك، وكيف تصحّح — بالأدوات نفسها التي سأبني بها كلّ عرضٍ لك.</p>
+    <p class="t-sm mt-md">اضغط <span class="key">→</span> للبدء.</p>
   </section>
 
-  <!-- 2 · Navigation -->
-  <section class="slide" dir="ltr">
-    <p class="kicker">Getting around</p>
-    <h2 class="t-lg">Move through the deck</h2>
+  <!-- 2 · التنقّل -->
+  <section class="slide" dir="rtl">
+    <p class="kicker">التنقّل</p>
+    <h2 class="t-lg">تنقّل بين الشرائح</h2>
     <ul class="bullets mt-md">
-      <li class="fragment"><span class="key">→</span> <span class="key">↓</span> <span class="key">Space</span> — next (and reveal points like these one at a time)</li>
-      <li class="fragment"><span class="key">←</span> <span class="key">↑</span> — back</li>
-      <li class="fragment"><span class="key">F</span> — fullscreen, for presenting and recording</li>
-      <li class="fragment"><span class="key">Home</span> <span class="key">End</span> — jump to the first or last slide</li>
-      <li class="fragment">Navigation is <strong>keyboard-only</strong> — a stray click never jumps the slide, so clicking is free for the review tools.</li>
+      <li class="fragment"><span class="key">→</span> <span class="key">↓</span> <span class="key">Space</span> — التالي (ويكشف النقاط مثل هذه واحدةً تلو الأخرى)</li>
+      <li class="fragment"><span class="key">←</span> <span class="key">↑</span> — السابق</li>
+      <li class="fragment"><span class="key">N</span> — افتح مُتصفّح الشرائح للقفز إلى أيّ شريحة</li>
+      <li class="fragment"><span class="key">F</span> — ملء الشاشة، للعرض والتسجيل</li>
+      <li class="fragment">التنقّل بالكيبورد فقط — لن ينتقل العرض بنقرة عابرة، فيبقى النقر متاحًا لأدوات المراجعة.</li>
     </ul>
   </section>
 
-  <!-- Section divider -->
-  <section class="slide slide-section" dir="ltr">
-    <p class="index">01</p>
-    <h2 class="t-xl mt-sm">What a slide can hold</h2>
-    <p class="t-md mt-sm">Text, lists, big numbers, charts — it's all just HTML.</p>
+  <!-- فاصل -->
+  <section class="slide slide-section" dir="rtl">
+    <p class="index">٠١</p>
+    <h2 class="t-xl mt-sm">ماذا يمكن أن تحوي الشريحة</h2>
+    <p class="t-md mt-sm">نصوص، وقوائم، وأرقام كبيرة، ورسوم — كلّها مجرّد HTML.</p>
   </section>
 
-  <!-- 3 · Bar chart (animated, random) -->
-  <section class="slide" dir="ltr">
-    <p class="kicker">Slides can show live data</p>
-    <h2 class="t-lg">Not just text — visuals too</h2>
+  <!-- 3 · رسم الأعمدة (متحرّك، عشوائيّ) -->
+  <section class="slide" dir="rtl">
+    <p class="kicker">الشرائح تعرض بيانات حيّة</p>
+    <h2 class="t-lg">ليست نصوصًا فحسب — بل رسومًا أيضًا</h2>
     <div class="chart-bars" data-bars>
-      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">Mon</div></div>
-      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">Tue</div></div>
-      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">Wed</div></div>
-      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">Thu</div></div>
-      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">Fri</div></div>
-      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">Sat</div></div>
+      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">الأحد</div></div>
+      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">الإثنين</div></div>
+      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">الثلاثاء</div></div>
+      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">الأربعاء</div></div>
+      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">الخميس</div></div>
+      <div class="bar-wrap"><div class="bar"><span class="bar-val"></span></div><div class="bar-label">الجمعة</div></div>
     </div>
-    <p class="chart-note">Sample data, re-rolled every time you land on this slide. A deck is plain HTML, so it can hold charts, metrics, diagrams — anything a browser can draw.</p>
+    <p class="chart-note">بيانات تجريبية تتغيّر كلّما عدت إلى هذه الشريحة. الشريحة مجرّد HTML، فيمكنها أن تحوي رسومًا وأرقامًا ومخطّطات — أيّ شيء يرسمه المتصفّح.</p>
   </section>
 
-  <!-- 4 · Line chart (animated, random) -->
-  <section class="slide" dir="ltr">
-    <p class="kicker">…and trends over time</p>
-    <h2 class="t-lg">Drawn fresh, right on the slide</h2>
-    <svg class="line-chart" data-line viewBox="0 0 600 240" preserveAspectRatio="xMidYMid meet" role="img" aria-label="An example trend line">
+  <!-- 4 · رسم خطّيّ (متحرّك، عشوائيّ) -->
+  <section class="slide" dir="rtl">
+    <p class="kicker">واتّجاهات عبر الزمن</p>
+    <h2 class="t-lg">تُرسم لحظتها، على الشريحة نفسها</h2>
+    <svg class="line-chart" data-line viewBox="0 0 600 240" preserveAspectRatio="xMidYMid meet" role="img" aria-label="مثال على خطّ اتّجاه">
       <path class="line-area"></path>
       <path class="line-path"></path>
     </svg>
-    <p class="chart-note">Same idea, different shape — random points each visit. When you ask me for a deck, I build visuals like these from your real numbers.</p>
+    <p class="chart-note">الفكرة ذاتها بشكلٍ مختلف — نقاط عشوائية في كلّ زيارة. وحين تطلب عرضًا، أرسم رسومًا كهذه من أرقامك الحقيقية.</p>
   </section>
 
-  <!-- Metrics row -->
-  <section class="slide" dir="ltr">
-    <p class="kicker">Or just the headline numbers</p>
-    <h2 class="t-lg">Big figures, clean and bold</h2>
-    <div class="cols mt-lg">
-      <div class="metric"><div class="figure">3×</div><div class="label">faster first draft</div></div>
-      <div class="metric"><div class="figure">12h</div><div class="label">saved each week</div></div>
-      <div class="metric"><div class="figure">1</div><div class="label">source of truth</div></div>
-    </div>
-    <p class="chart-note">Placeholder figures — your decks use your real ones.</p>
-  </section>
-
-  <!-- Arabic (RTL) — the kit speaks both directions -->
+  <!-- صفّ الأرقام -->
   <section class="slide" dir="rtl">
-    <p class="kicker">والعربية أيضًا</p>
-    <h2 class="t-lg">يعمل من اليمين إلى اليسار</h2>
-    <p class="t-md mt-md">اضبط <code dir="ltr">dir="rtl"</code> على أيّ شريحة، فينعكس تخطيطها بالكامل. يمكن للعرض الواحد أن يجمع بين العربية والإنجليزية، شريحةً بشريحة.</p>
+    <p class="kicker">أو الأرقام البارزة وحدها</p>
+    <h2 class="t-lg">أرقام كبيرة، أنيقة وواضحة</h2>
+    <div class="cols mt-lg">
+      <div class="metric"><div class="figure">3×</div><div class="label">أسرع في المسودّة الأولى</div></div>
+      <div class="metric"><div class="figure">12h</div><div class="label">نوفّرها كلّ أسبوع</div></div>
+      <div class="metric"><div class="figure">1</div><div class="label">مصدر واحد للحقيقة</div></div>
+    </div>
+    <p class="chart-note">أرقام للتوضيح فقط — عروضك تستخدم أرقامك الحقيقية.</p>
   </section>
 
-  <!-- 5 · Review tool -->
+  <!-- الإنجليزية (LTR) — العُدّة تتكلّم الاتّجاهين -->
   <section class="slide" dir="ltr">
-    <p class="kicker">Tell me what to change</p>
-    <h2 class="t-lg">Review, right on the slide <span class="key">R</span></h2>
+    <p class="kicker">And English too</p>
+    <h2 class="t-lg">Left-to-right, whenever you need it</h2>
+    <p class="t-md mt-md">Set <code>dir="ltr"</code> on any slide and its layout flips back. One deck can mix Arabic and English, slide by slide.</p>
+  </section>
+
+  <!-- تفاعليّة — الشرائح ليست صورًا جامدة -->
+  <section class="slide slide-statement" dir="rtl" data-playground>
+    <div class="playground"></div>
+    <div class="pg-caption">
+      <p class="kicker">تفاعليّة بلا حدود</p>
+      <p class="t-xl">حرّك الفأرة هنا… وانقر.</p>
+      <p class="t-md" style="color:#C9BCAE">الشريحة صفحة ويب كاملة — يمكنها أن تتفاعل، لا أن تُعرض فحسب.</p>
+    </div>
+  </section>
+
+  <!-- 5 · أداة المراجعة -->
+  <section class="slide" dir="rtl">
+    <p class="kicker">أخبرني بما أغيّر</p>
+    <h2 class="t-lg">راجِع مباشرةً على الشريحة <span class="key">R</span></h2>
     <ul class="bullets mt-md">
-      <li class="fragment">See the round <strong>pencil button</strong> at the top-right? Click it — or press <span class="key">R</span> — to open the review panel.</li>
-      <li class="fragment">Type what you'd like changed on this slide and hit <strong>Send to agent</strong> (or <span class="key">Ctrl</span>+<span class="key">Enter</span>).</li>
-      <li class="fragment">A green <strong>● watcher live</strong> badge means I'm listening — your comment reaches me the moment you send it.</li>
-      <li class="fragment">Want a comment about one specific thing? Hover it and click <strong>📌 Attach</strong> — I'll change exactly that element.</li>
-      <li class="fragment"><strong>Try it now:</strong> open the panel and leave a comment on this slide.</li>
+      <li class="fragment">أترى زرّ القلم الدائريّ أعلى يمين الشاشة؟ انقره — أو اضغط <span class="key">R</span> — لفتح لوحة المراجعة.</li>
+      <li class="fragment">اكتب ما تودّ تغييره في هذه الشريحة واضغط <strong>أرسِل</strong> (أو <span class="key">Ctrl</span>+<span class="key">Enter</span>).</li>
+      <li class="fragment">شارة <strong>● watcher live</strong> الخضراء تعني أنّني أستمع — تصلني ملاحظتك فور إرسالها.</li>
+      <li class="fragment">تريد ملاحظةً على عنصرٍ بعينه؟ مرّر فوقه واضغط <strong>📌 Attach</strong> — فأعدّل ذلك العنصر بالضبط.</li>
+      <li class="fragment"><strong>جرّبها الآن:</strong> افتح اللوحة واترك ملاحظةً على هذه الشريحة.</li>
     </ul>
   </section>
 
-  <!-- 6 · Edit mode -->
-  <section class="slide" dir="ltr">
-    <p class="kicker">Fix small things yourself</p>
-    <h2 class="t-lg">Edit text inline <span class="key">E</span></h2>
+  <!-- 6 · وضع التحرير -->
+  <section class="slide" dir="rtl">
+    <p class="kicker">صحّح الصغائر بنفسك</p>
+    <h2 class="t-lg">حرّر النصّ مباشرةً <span class="key">E</span></h2>
     <ul class="bullets mt-md">
-      <li class="fragment">Press <span class="key">E</span> (or the <strong>Edit mode</strong> button) to make the text editable.</li>
-      <li class="fragment">Click any line, fix the typo, then click away — small fixes save straight to the file.</li>
-      <li class="fragment">Anything bigger? Leave it as a comment instead, and I'll handle it.</li>
-      <li class="fragment">Press <span class="key">Esc</span> to leave edit mode or close the panel.</li>
+      <li class="fragment">اضغط <span class="key">E</span> (أو زرّ <strong>Edit mode</strong>) ليصبح النصّ قابلاً للتحرير.</li>
+      <li class="fragment">انقر أيّ سطر، صحّح الخطأ، ثمّ انقر خارجه — تُحفظ التصحيحات الصغيرة في الملفّ مباشرة.</li>
+      <li class="fragment">وما كان أكبر من ذلك؟ اتركه ملاحظةً وسأتكفّل به.</li>
+      <li class="fragment">اضغط <span class="key">Esc</span> للخروج من وضع التحرير أو لإغلاق اللوحة.</li>
     </ul>
   </section>
 
-  <!-- 7 · Clean to present -->
-  <section class="slide slide-statement" dir="ltr">
-    <p class="kicker">When it's ready</p>
-    <p class="t-xl">Press <span class="key" style="font-size:.7em">F</span> and the review tools vanish.<br>The deck you reviewed is the deck you present — and the PDF you export.</p>
+  <!-- 7 · نظيفٌ للعرض -->
+  <section class="slide slide-statement" dir="rtl">
+    <p class="kicker">عند الجاهزية</p>
+    <p class="t-xl">اضغط <span class="key" style="font-size:.7em">F</span> فتختفي أدوات المراجعة.<br>ما راجعته هو ما تعرضه — وما تصدّره ملفّ PDF.</p>
   </section>
 
-  <!-- Section divider -->
-  <section class="slide slide-section" dir="ltr">
-    <p class="index">02</p>
-    <h2 class="t-xl mt-sm">Your turn</h2>
-    <p class="t-md mt-sm">Now let's make one of your own.</p>
+  <!-- فاصل -->
+  <section class="slide slide-section" dir="rtl">
+    <p class="index">٠٢</p>
+    <h2 class="t-xl mt-sm">دورك</h2>
+    <p class="t-md mt-sm">الآن لنصنع عرضك أنت.</p>
   </section>
 
-  <!-- 8 · How to start -->
-  <section class="slide" dir="ltr">
-    <p class="kicker">The loop</p>
-    <h2 class="t-lg">Making a deck with me</h2>
+  <!-- 8 · كيف نبدأ -->
+  <section class="slide" dir="rtl">
+    <p class="kicker">الطريقة</p>
+    <h2 class="t-lg">نصنع عرضًا معًا</h2>
     <ol class="steps mt-md">
-      <li class="fragment">Tell me what you need — <em>"a deck for my Q1 update."</em></li>
-      <li class="fragment">Share the content however suits you — talk it through here, paste it, or point me at a document.</li>
-      <li class="fragment">I build it; you review with the tools you just learned; I revise until it's right.</li>
+      <li class="fragment">أخبرني بما تريد — <em>«عرضٌ لتحديث الربع الأول».</em></li>
+      <li class="fragment">شارك المحتوى كما يناسبك — تحدّث هنا، أو الصق نصًّا، أو أرشدني إلى مستند.</li>
+      <li class="fragment">أبنيه، فتراجعه بالأدوات التي تعلّمتها للتوّ، وأنقّحه حتى يصير كما تريد.</li>
     </ol>
   </section>
 
-  <!-- 9 · Closing -->
-  <section class="slide slide-title" dir="ltr">
-    <p class="kicker">Your turn</p>
-    <h1 class="t-hero">Ready when you are.</h1>
-    <p class="t-md mt-md">Tell me about your first presentation — or ask me to finish setting things up.</p>
+  <!-- اجعلها على هويّتك -->
+  <section class="slide" dir="rtl">
+    <p class="kicker">اجعلها على هويّتك</p>
+    <h2 class="t-lg">غيّر السمة والشعار بطلبٍ واحد</h2>
+    <ul class="bullets mt-md">
+      <li class="fragment">الألوان والخطوط كلّها في ملفّ <code>theme.css</code> — لا حاجة لتعديله بنفسك.</li>
+      <li class="fragment">اطلب منّي فحسب: <em>«لوّن العرض بأزرق علامتنا <span class="en" dir="ltr">#1F6FEB</span>»</em> فأضبطه.</li>
+      <li class="fragment">للشعار: <em>«استبدل الشعار بشعار شركتنا»</em> وأعطني الصورة أو رابطها.</li>
+      <li class="fragment">سمتك الحالية هي <strong>Extend Academy</strong> — برتقاليّ دافئ على أبيض، وخطّ <span class="en" dir="ltr">IBM Plex Sans Arabic</span>.</li>
+    </ul>
+  </section>
+
+  <!-- 9 · احتفال (ختام) -->
+  <section class="slide slide-celebrate" dir="rtl" data-celebrate>
+    <div class="confetti-layer"></div>
+    <div class="celebrate-burst">🎉</div>
+    <h1 class="celebrate-title">أنت جاهز الآن!</h1>
+    <p class="celebrate-sub">حدّثني عن أوّل عرضٍ لك، وسأبدأ على الفور.</p>
+    <div class="celebrate-emojis"><span>🎊</span><span>✨</span><span>🥳</span><span>🚀</span><span>🎈</span></div>
   </section>
 
 </div><!-- #deck -->
 
-<div class="deck-footer">Welcome · Presentation Studio</div>
+<div class="deck-footer">مرحبًا · استوديو العروض</div>
 
 <script src="deck.js"></script>
 <script src="review.js"></script>
@@ -241,7 +295,31 @@
     });
   }
 
-  function render(slide) { renderBars(slide); renderLine(slide); }
+  // Excessive confetti for the celebration slide.
+  function renderConfetti(slide) {
+    var layer = slide.querySelector('.confetti-layer');
+    if (!layer) return;
+    layer.innerHTML = '';
+    var colors = ['#7B2E39', '#A8505C', '#E4B363', '#6FCF97', '#5B8DEF', '#F2E9DC', '#E07A5F'];
+    var shapes = ['', '50%', '0'];  // square, circle, square — varied via border-radius
+    for (var i = 0; i < 120; i++) {
+      var c = document.createElement('div');
+      c.className = 'confetti';
+      var size = rand(7, 15);
+      c.style.left = rand(0, 100) + 'vw';
+      c.style.width = size + 'px';
+      c.style.height = (size * (rand(8, 16) / 10)) + 'px';
+      c.style.background = colors[i % colors.length];
+      c.style.borderRadius = shapes[i % shapes.length];
+      var fall = (rand(18, 42) / 10);   // 1.8s–4.2s
+      var spin = (rand(6, 18) / 10);
+      c.style.animationDuration = fall + 's, ' + spin + 's';
+      c.style.animationDelay = (rand(0, 30) / 10) + 's, 0s';
+      layer.appendChild(c);
+    }
+  }
+
+  function render(slide) { renderBars(slide); renderLine(slide); renderConfetti(slide); }
 
   var obs = new MutationObserver(function (muts) {
     muts.forEach(function (m) {
@@ -252,6 +330,41 @@
 
   var active = document.querySelector('.slide.active');
   if (active) render(active);
+
+  // Interactive playground: move the mouse to trail dots, click for a burst.
+  (function bindPlayground() {
+    var pg = document.querySelector('[data-playground] .playground');
+    if (!pg) return;
+    var colors = ['#FF812C', '#FFA559', '#6FCF97', '#5B8DEF', '#E4B363', '#E07A5F', '#F4EFE9'];
+    var last = 0;
+    function dot(x, y, size, dx, dy, life) {
+      var d = document.createElement('div');
+      d.className = 'pg-dot';
+      d.style.width = size + 'px'; d.style.height = size + 'px';
+      d.style.background = colors[Math.floor(Math.random() * colors.length)];
+      d.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+      document.body.appendChild(d);
+      var start = 0;
+      requestAnimationFrame(function step(t) {
+        if (!start) start = t;
+        var p = (t - start) / life;
+        if (p >= 1) { d.remove(); return; }
+        d.style.transform = 'translate(' + (x + dx * p) + 'px,' + (y + dy * p) + 'px) scale(' + (1 - p * 0.6) + ')';
+        d.style.opacity = String(1 - p);
+        requestAnimationFrame(step);
+      });
+    }
+    pg.addEventListener('pointermove', function (e) {
+      var now = Date.now(); if (now - last < 24) return; last = now;
+      dot(e.clientX - 6, e.clientY - 6, rand(8, 16), rand(-30, 30), rand(-90, -40), rand(600, 1100));
+    });
+    pg.addEventListener('click', function (e) {
+      for (var i = 0; i < 18; i++) {
+        var ang = Math.PI * 2 * i / 18, r = rand(60, 170);
+        dot(e.clientX - 7, e.clientY - 7, rand(9, 18), Math.cos(ang) * r, Math.sin(ang) * r, rand(700, 1200));
+      }
+    });
+  })();
 })();
 </script>
 </body>

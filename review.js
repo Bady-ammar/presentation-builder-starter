@@ -87,37 +87,56 @@
   function refreshStatus() {
     var pill = panel && panel.querySelector(".rv-status");
     if (!pill) return;
+    var msg = panel.querySelector(".rv-watcher-msg");
+    // When no watcher is live, tell the user to ASK their agent (they never
+    // run commands themselves) — the comment they leave won't reach Claude
+    // until the watcher is running.
+    function showAskClaude(show) {
+      if (!msg) return;
+      if (show) {
+        msg.style.display = "";
+        msg.innerHTML = "⚠ No watcher running — your comments are saved but won't reach Claude live. " +
+          "Just ask your agent: <em>“please watch for my review comments.”</em>";
+      } else {
+        msg.style.display = "none";
+      }
+    }
     fetch("/__review/health")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
         pill.className = "rv-status";
         if (!j || !j.ok) {
           pill.classList.add("offline"); pill.textContent = "⚠ server down";
-          pill.title = "Can't reach review.py."; return;
+          pill.title = "Can't reach review.py."; showAskClaude(false); return;
         }
         var L = j.listener || {};
         var age = L.last_seen_seconds_ago;
         if (age === null || age === undefined) {
           pill.classList.add("offline");
           pill.textContent = "⚠ no watcher";
-          pill.title = "Comments are saved, but no watcher is running — your agent isn't listening live. Start one with: python3 watch.py";
+          pill.title = "Comments are saved, but no watcher is running — ask your agent to start watching.";
+          showAskClaude(true);
         } else if (age < 45) {
           pill.classList.add("live");
           pill.textContent = "● watcher live";
           pill.title = "Heartbeat " + Math.round(age) + "s ago. Comments stream to your agent as you send them.";
+          showAskClaude(false);
         } else if (age < 300) {
           pill.classList.add("stale");
           pill.textContent = "⚠ watcher stale";
           pill.title = "Watcher went quiet " + Math.round(age) + "s ago — it may have stopped.";
+          showAskClaude(false);
         } else {
           pill.classList.add("offline");
           pill.textContent = "⚠ no watcher";
           pill.title = "Last heartbeat " + Math.round(age) + "s ago — treat as stopped.";
+          showAskClaude(true);
         }
       })
       .catch(function () {
         pill.className = "rv-status offline";
         pill.textContent = "⚠ server down";
+        showAskClaude(false);
       });
   }
 
@@ -144,6 +163,7 @@
       "</div>" +
       '<div class="rv-body">' +
         '<div class="rv-slide-info"></div>' +
+        '<div class="rv-watcher-msg" style="display:none"></div>' +
         '<textarea class="rv-text" rows="3" placeholder="Comment on this slide… (what to change and why)"></textarea>' +
         '<div class="rv-row">' +
           '<button class="rv-send">Send to agent</button>' +
@@ -380,12 +400,29 @@
   }
 
   // ---- inline edit --------------------------------------------------
-  // Only leaf elements (no child tags) are editable, so saving back to
-  // the file is a safe, unambiguous text swap.
+  // Two kinds of editable element:
+  //   • leaf text  (no child tags)        → save a plain text swap
+  //   • inline-rich (only inline children, e.g. a <li> with a <span class="key">)
+  //                                        → save an innerHTML swap
+  // Both save back to the file when the swap is unambiguous; otherwise the
+  // change is handed to the agent as a comment.
+  var INLINE_TAGS = { SPAN:1, EM:1, STRONG:1, B:1, I:1, A:1, CODE:1, KBD:1, SMALL:1,
+                      MARK:1, SUP:1, SUB:1, BR:1, BDI:1, BDO:1, ABBR:1, U:1, S:1 };
+
+  function hasOnlyInlineChildren(el) {
+    for (var i = 0; i < el.children.length; i++) {
+      if (!INLINE_TAGS[el.children[i].tagName]) return false;
+    }
+    return el.children.length > 0;
+  }
+
   function editableEls() {
     return Array.prototype.slice
-      .call(activeSlide().querySelectorAll("h1,h2,h3,p,li,.kicker,.figure,.label,.index"))
-      .filter(function (el) { return el.children.length === 0 && el.textContent.trim().length; });
+      .call(activeSlide().querySelectorAll("h1,h2,h3,p,li,.kicker,.figure,.label,.index,.celebrate-title,.celebrate-sub"))
+      .filter(function (el) {
+        if (!el.textContent.trim().length) return false;
+        return el.children.length === 0 || hasOnlyInlineChildren(el);
+      });
   }
 
   function toggleEdit() { editing ? exitEdit() : enterEdit(); }
@@ -398,10 +435,14 @@
     editBtn.textContent = "Editing — done";
     editableEls().forEach(function (el) {
       el.setAttribute("contenteditable", "true");
-      el.dataset.rvOld = el.textContent;
+      if (el.children.length === 0) {
+        el.dataset.rvOld = el.textContent;          // leaf → text mode
+      } else {
+        el.dataset.rvOldInner = el.innerHTML;       // inline-rich → html mode
+      }
       el.addEventListener("blur", saveEdit);
     });
-    toast("Edit mode — click text to fix it, click away to save");
+    toast("Edit mode — click any line to fix it, click away to save");
   }
 
   function exitEdit() {
@@ -409,36 +450,44 @@
     document.body.classList.remove("review-editing");
     editBtn.classList.remove("on");
     editBtn.textContent = "Edit mode";
-    editableEls().forEach(function (el) {
+    Array.prototype.slice.call(document.querySelectorAll("[contenteditable]")).forEach(function (el) {
       el.removeAttribute("contenteditable");
+      delete el.dataset.rvOld;
+      delete el.dataset.rvOldInner;
       el.removeEventListener("blur", saveEdit);
     });
   }
 
   function saveEdit(e) {
     var el = e.target;
-    var oldText = el.dataset.rvOld;
-    var newText = el.textContent;
-    if (oldText === undefined || newText === oldText) return;
     var slide = activeSlide();
-    postJSON("/__review/edit", {
-      slidePath: location.pathname,
-      slideIndex: activeIndex(),
-      editId: editId(slide, el),
-      oldText: oldText,
-      newText: newText,
-    }).then(function (res) {
-      if (res.ok && res.data && res.data.applied) { el.dataset.rvOld = newText; toast("Saved ✓"); refreshSent(); }
-      else {
-        // Couldn't apply cleanly (duplicate text) — hand it to the agent as a comment.
-        el.textContent = oldText;
+    var rich = el.dataset.rvOldInner !== undefined;
+    var oldVal = rich ? el.dataset.rvOldInner : el.dataset.rvOld;
+    var newVal = rich ? el.innerHTML : el.textContent;
+    if (oldVal === undefined || newVal === oldVal) return;
+
+    var payload = { slidePath: location.pathname, slideIndex: activeIndex(), editId: editId(slide, el) };
+    if (rich) { payload.richEdit = true; payload.oldInner = oldVal; payload.newInner = newVal; }
+    else { payload.oldText = oldVal; payload.newText = newVal; }
+
+    postJSON("/__review/edit", payload).then(function (res) {
+      if (res.ok && res.data && res.data.applied) {
+        if (rich) el.dataset.rvOldInner = newVal; else el.dataset.rvOld = newVal;
+        toast("Saved ✓"); refreshSent();
+      } else {
+        // Couldn't apply cleanly — revert the DOM and hand it to the agent.
+        if (rich) el.innerHTML = oldVal; else el.textContent = oldVal;
+        var oldPlain = rich ? htmlToText(oldVal) : oldVal;
+        var newPlain = rich ? htmlToText(newVal) : newVal;
         postJSON("/__review/comment", {
           slidePath: location.pathname, slideIndex: activeIndex(), slideTitle: slideTitle(slide),
-          comment: 'Change the text "' + oldText + '" to "' + newText + '".',
+          comment: 'Change the line "' + oldPlain + '" to "' + newPlain + '".',
         }).then(function () { toast("Sent as a comment for the agent"); refreshSent(); });
       }
     });
   }
+
+  function htmlToText(html) { var d = document.createElement("div"); d.innerHTML = html; return (d.textContent || "").trim().replace(/\s+/g, " "); }
 
   function editId(slide, el) {
     var tag = el.tagName.toLowerCase();
@@ -464,75 +513,83 @@
       // Floating toggle button — mirrors the course tool: round, top-right,
       // and hidden in fullscreen so it never shows while presenting.
       ".rv-toggle-btn{position:fixed;top:16px;right:16px;z-index:2002;width:44px;height:44px;border-radius:50%;" +
-      "border:2px solid var(--accent,#7b2e39);background:rgba(255,255,255,.85);backdrop-filter:blur(8px);" +
+      "border:2px solid var(--accent,#ff812c);background:rgba(255,255,255,.85);backdrop-filter:blur(8px);" +
       "-webkit-backdrop-filter:blur(8px);cursor:pointer;display:flex;align-items:center;justify-content:center;" +
       "box-shadow:0 2px 10px rgba(0,0,0,.12);transition:all .2s ease}" +
       ".rv-toggle-btn:hover{box-shadow:0 4px 15px rgba(0,0,0,.22)}" +
-      ".rv-toggle-btn.active{background:var(--accent,#7b2e39)}" +
+      ".rv-toggle-btn.active{background:var(--accent,#ff812c)}" +
       ".rv-toggle-btn.active .rv-toggle-icon{color:#fff}" +
-      ".rv-toggle-icon{font-size:1.25em;line-height:1;color:var(--accent,#7b2e39)}" +
+      ".rv-toggle-icon{font-size:1.25em;line-height:1;color:var(--accent,#ff812c)}" +
       ".rv-toggle-btn .rv-badge{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;" +
       "background:#ef4444;color:#fff;font-size:.7em;font-weight:700;border-radius:10px;display:flex;align-items:center;" +
       "justify-content:center;line-height:1}" +
-      // Slide-in panel from the right edge.
+      // Slide-in panel from the right edge — light, to match the Editorial deck.
       "#review-panel{position:fixed;top:0;right:-360px;width:340px;height:100vh;z-index:2001;" +
-      "background:rgba(31,36,41,.98);color:#e7e2da;box-shadow:-4px 0 20px rgba(0,0,0,.35);display:flex;" +
+      "background:var(--bg,#fbf7f0);color:var(--ink,#211a18);box-shadow:-4px 0 24px rgba(34,28,26,.16);display:flex;" +
       "flex-direction:column;transition:right .3s cubic-bezier(.4,0,.2,1);direction:ltr;" +
+      "border-left:1px solid var(--rule,#e4d8c7);" +
       "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px}" +
       "#review-panel.open{right:0}" +
       // Push the deck off the panel rather than covering it (deck is fixed/inset:0).
       "#deck{transition:inset .3s cubic-bezier(.4,0,.2,1)}" +
       "body.rv-panel-open #deck{inset-inline-end:340px}" +
-      "#review-panel .rv-head{display:flex;align-items:center;gap:8px;padding:14px 16px;background:#171b1f}" +
-      "#review-panel .rv-head h3{margin:0;font-size:1.05em;font-weight:600}" +
+      "#review-panel .rv-head{display:flex;align-items:center;gap:8px;padding:14px 16px;" +
+      "background:var(--bg-tint,#f2e9dc);border-bottom:1px solid var(--rule,#e4d8c7)}" +
+      "#review-panel .rv-head h3{margin:0;font-size:1.05em;font-weight:700;color:var(--accent,#ff812c)}" +
       "#review-panel .rv-status{flex:1 1 auto;min-width:0;font-size:.72em;font-weight:600;letter-spacing:.3px;" +
       "padding:3px 9px;border-radius:999px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}" +
-      "#review-panel .rv-status.unknown{background:#2a3036;color:#9aa0a6}" +
-      "#review-panel .rv-status.live{background:#16331f;color:#6fcf97}" +
-      "#review-panel .rv-status.stale{background:#4a3a12;color:#f0c453}" +
-      "#review-panel .rv-status.offline{background:#3a1f22;color:#f0928a}" +
-      "#review-panel .rv-close{margin-left:auto;background:none;border:none;color:#9aa0a6;font-size:24px;line-height:1;cursor:pointer;padding:0 4px}" +
+      "#review-panel .rv-status.unknown{background:#ece4d6;color:#8a8178}" +
+      "#review-panel .rv-status.live{background:#e2f0e7;color:#2f7d4f}" +
+      "#review-panel .rv-status.stale{background:#f8ecd0;color:#9a6a12}" +
+      "#review-panel .rv-status.offline{background:#f7e0dd;color:#b3382c}" +
+      "#review-panel .rv-close{margin-left:auto;background:none;border:none;color:var(--ink-faint,#9a8e84);font-size:24px;line-height:1;cursor:pointer;padding:0 4px}" +
       "#review-panel .rv-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px;overflow:auto}" +
-      "#review-panel .rv-slide-info{font-size:12px;color:#9aa0a6;border-bottom:1px solid #2d343b;padding-bottom:8px}" +
-      "#review-panel .rv-text{width:100%;resize:vertical;background:#2a3036;color:#e7e2da;border:1px solid #3a424a;" +
+      "#review-panel .rv-slide-info{font-size:12px;color:var(--ink-faint,#9a8e84);border-bottom:1px solid var(--rule,#e4d8c7);padding-bottom:8px}" +
+      "#review-panel .rv-watcher-msg{font-size:12px;line-height:1.5;color:#9a6a12;background:#f8ecd0;border:1px solid #ecd9a8;border-radius:8px;padding:8px 10px}" +
+      "#review-panel .rv-watcher-msg em{color:#7a5310;font-style:normal;font-weight:600}" +
+      "#review-panel .rv-text{width:100%;resize:vertical;background:#fff;color:var(--ink,#211a18);border:1px solid var(--rule,#e4d8c7);" +
       "border-radius:8px;padding:8px 10px;font:inherit;box-sizing:border-box}" +
+      "#review-panel .rv-text:focus{outline:none;border-color:var(--accent,#ff812c)}" +
       "#review-panel .rv-row{display:flex;gap:8px}" +
       "#review-panel button.rv-send,#review-panel button.rv-edit{flex:1;border:none;border-radius:8px;padding:9px 10px;" +
       "font:inherit;font-weight:600;cursor:pointer}" +
-      "#review-panel .rv-send{background:var(--accent,#7b2e39);color:#fff}" +
-      "#review-panel .rv-send:disabled{opacity:.5;cursor:default}" +
-      "#review-panel .rv-edit{background:#2a3036;color:#cdd2d6;border:1px solid #3a424a}" +
-      "#review-panel .rv-edit.on{background:#6fcf97;color:#16331f;border-color:#6fcf97}" +
-      "#review-panel .rv-send-hint{font-size:11px;color:#7e858c;margin-top:-4px}" +
-      "#review-panel .rv-sent-title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#7e858c;margin-top:4px}" +
+      "#review-panel .rv-send{background:var(--accent,#ff812c);color:#fff}" +
+      "#review-panel .rv-send:disabled{opacity:.45;cursor:default}" +
+      "#review-panel .rv-edit{background:#fff;color:var(--ink-soft,#6b5f57);border:1px solid var(--rule,#e4d8c7)}" +
+      "#review-panel .rv-edit.on{background:#2f7d4f;color:#fff;border-color:#2f7d4f}" +
+      "#review-panel .rv-send-hint{font-size:11px;color:var(--ink-faint,#9a8e84);margin-top:-4px}" +
+      "#review-panel .rv-sent-title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint,#9a8e84);margin-top:4px}" +
       "#review-panel .rv-sent{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}" +
-      "#review-panel .rv-sent li{font-size:12.5px;line-height:1.4;color:#c4c9ce;background:#23282d;border-radius:6px;padding:6px 8px}" +
-      "#review-panel .rv-empty{color:#6b7177;background:none!important;padding-left:0!important}" +
+      "#review-panel .rv-sent li{font-size:12.5px;line-height:1.4;color:var(--ink-soft,#6b5f57);background:#fff;border:1px solid var(--rule,#e4d8c7);border-radius:6px;padding:6px 8px}" +
+      "#review-panel .rv-empty{color:var(--ink-faint,#9a8e84);background:none!important;border:none!important;padding-left:0!important}" +
       "#review-panel .rv-badge-pill{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;margin-right:6px;vertical-align:middle}" +
-      "#review-panel .rv-pending .rv-badge-pill{background:#4a3a12;color:#f0c453}" +
-      "#review-panel .rv-done .rv-badge-pill{background:#16331f;color:#6fcf97}" +
-      "#review-panel .rv-hint{font-size:11.5px;line-height:1.6;color:#8a9097;margin-top:4px}" +
-      "#review-panel .rv-hint code{background:#2a3036;padding:1px 5px;border-radius:4px}" +
-      "#review-panel .rv-hint kbd{background:#2a3036;border:1px solid #3a424a;border-radius:4px;padding:0 5px;font:inherit;font-size:11px}" +
-      "body.review-editing [contenteditable]{outline:2px dashed var(--accent,#7b2e39);outline-offset:3px;border-radius:3px;cursor:text}" +
+      "#review-panel .rv-pending .rv-badge-pill{background:#f8ecd0;color:#9a6a12}" +
+      "#review-panel .rv-done .rv-badge-pill{background:#e2f0e7;color:#2f7d4f}" +
+      "#review-panel .rv-hint{font-size:11.5px;line-height:1.6;color:var(--ink-faint,#9a8e84);margin-top:4px}" +
+      "#review-panel .rv-hint code{background:#ece4d6;color:var(--accent,#ff812c);padding:1px 5px;border-radius:4px}" +
+      "#review-panel .rv-hint kbd{background:#fff;border:1px solid var(--rule,#e4d8c7);border-radius:4px;padding:0 5px;font:inherit;font-size:11px}" +
+      "body.review-editing [contenteditable]{outline:2px dashed var(--accent,#ff812c);outline-offset:3px;border-radius:3px;cursor:text}" +
       // Attach-an-element UI.
       ".rv-attach-btn{position:fixed;z-index:2003;display:none;align-items:center;gap:5px;padding:4px 10px;border:none;" +
-      "border-radius:7px;background:var(--accent,#7b2e39);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;" +
-      "font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.3)}" +
+      "border-radius:7px;background:var(--accent,#ff812c);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;" +
+      "font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 3px 12px rgba(34,28,26,.28)}" +
       ".rv-attach-btn.visible{display:flex}" +
-      ".rv-hover-target{outline:2px dashed var(--accent,#7b2e39);outline-offset:3px;border-radius:3px}" +
-      "#review-panel .rv-attached-chip{display:flex;align-items:center;gap:7px;background:#2a3036;border:1px solid #3a424a;" +
+      ".rv-hover-target{outline:2px dashed var(--accent,#ff812c);outline-offset:3px;border-radius:3px}" +
+      "#review-panel .rv-attached-chip{display:flex;align-items:center;gap:7px;background:var(--bg-tint,#f2e9dc);border:1px solid var(--rule,#e4d8c7);" +
       "border-radius:8px;padding:6px 9px}" +
-      "#review-panel .rv-chip-tag{font-weight:700;font-size:11.5px;color:#e7a3ad;white-space:nowrap}" +
-      "#review-panel .rv-chip-snippet{flex:1 1 auto;min-width:0;font-size:11.5px;color:#9aa0a6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
-      "#review-panel .rv-chip-x{background:none;border:none;color:#9aa0a6;font-size:14px;line-height:1;cursor:pointer;padding:0 2px}" +
-      ".rv-toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(12px);background:#1f2429;color:#e7e2da;" +
+      "#review-panel .rv-chip-tag{font-weight:700;font-size:11.5px;color:var(--accent,#ff812c);white-space:nowrap}" +
+      "#review-panel .rv-chip-snippet{flex:1 1 auto;min-width:0;font-size:11.5px;color:var(--ink-soft,#6b5f57);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
+      "#review-panel .rv-chip-x{background:none;border:none;color:var(--ink-faint,#9a8e84);font-size:14px;line-height:1;cursor:pointer;padding:0 2px}" +
+      ".rv-toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--ink,#211a18);color:#f4ece2;" +
       "padding:10px 18px;border-radius:999px;font-family:-apple-system,sans-serif;font-size:13.5px;font-weight:500;" +
-      "box-shadow:0 8px 28px rgba(0,0,0,.35);opacity:0;transition:all .28s ease;z-index:10000;pointer-events:none}" +
+      "box-shadow:0 8px 28px rgba(34,28,26,.3);opacity:0;transition:all .28s ease;z-index:10000;pointer-events:none}" +
       ".rv-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}" +
       // Hide every review chrome in fullscreen so a recording / presentation is clean.
       ":fullscreen .rv-toggle-btn,:fullscreen #review-panel,:fullscreen .rv-toast,:fullscreen .rv-attach-btn," +
-      ":-webkit-full-screen .rv-toggle-btn,:-webkit-full-screen #review-panel,:-webkit-full-screen .rv-toast,:-webkit-full-screen .rv-attach-btn{display:none!important}";
+      ":-webkit-full-screen .rv-toggle-btn,:-webkit-full-screen #review-panel,:-webkit-full-screen .rv-toast,:-webkit-full-screen .rv-attach-btn{display:none!important}" +
+      // …and since the panel is hidden in fullscreen, stop reserving space for it —
+      // otherwise the deck stays shifted left as if the panel were still open.
+      ":fullscreen #deck,:-webkit-full-screen #deck{inset-inline-end:0!important}";
     document.head.appendChild(css);
   }
 })();

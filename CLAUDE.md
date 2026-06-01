@@ -70,9 +70,10 @@ ONE AT A TIME, waiting for each answer. Keep them light and conversational:
      → e.g. "Sara Al-Otaibi, Marketing Lead"
   2. "Will your decks be mostly in Arabic, English, or a mix?"
      → sets the default direction (Arabic = RTL, English = LTR).
-  3. "The default look is warm and editorial — off-white, elegant serif
-      headings, a muted burgundy accent. Happy to keep it, or would you
-      like your own color? Just name it or give me a hex."
+  3. "The look is the Extend Academy theme — a warm near-white canvas,
+      clean IBM Plex Sans Arabic headings, and a bright orange accent, with
+      the Extend Academy logo in the corner. Happy to keep it, or would you
+      like your own brand color? Just name it or give me a hex."
      → if they give a color, update the accent.
   4. "What kind of presentations will you make most often?
       (weekly updates, client pitches, internal reviews…)"
@@ -84,6 +85,10 @@ APPLY their answers:
   - New accent color → edit `theme.css`: set `--accent` to their hex and
     `--accent-soft` to a slightly lighter shade. Leave the rest of the
     palette unless they ask.
+  - Own logo → drop their file in `assets/` and point the `.deck-logo`
+    `<img src>` at it (or remove the element if they want none). The
+    Extend Academy logo ships as the default at
+    `assets/extend-academy-logo.png`.
   - Footer text → remember it in the Project profile below and use it on
     the decks you build (don't edit `welcome.html` — that's the tour).
   - Do NOT rewrite `welcome.html` — it stays as the tour + style
@@ -128,6 +133,8 @@ finished decks, then help refine them.
 │                           (title, section, content, statement, lists,
 │                           metrics, charts) in both English and Arabic.
 │                           Don't overwrite it — read it, copy its patterns.
+├── assets/              ← images used by decks (ships with the Extend
+│                           Academy logo: extend-academy-logo.png)
 └── presentations/       ← one folder per presentation
     └── example/
         ├── deck.html    ← the finished deck you build
@@ -170,7 +177,9 @@ self-contained and easy to copy, share, or delete. The finished
    ```
    Fix the relative paths — from inside `presentations/<name>/`, every
    link to a root file is `../../` (so `../../theme.css`, `../../deck.js`,
-   `../../review.js`).
+   `../../review.js`). For the brand logo, copy the `<img class="deck-logo">`
+   element too, pointing at `../../assets/extend-academy-logo.png` (or the
+   person's own logo).
 5. **Use the existing classes only.** Build from the slide types and
    helpers already in `theme.css` (see reference below). Don't invent
    new CSS unless the person asks for something the theme can't express
@@ -194,6 +203,10 @@ self-contained and easy to copy, share, or delete. The finished
   for big numbers.
 - Helpers: `t-hero/t-xl/t-lg/t-md/t-sm`, `kicker`, `accent`, `divider`,
   `mt-sm/mt-md/mt-lg`, `code` / `.mono` (auto-isolated LTR).
+- Brand: `<img class="deck-logo">` — a fixed corner logo on every slide.
+- Theme: the **Extend Academy** palette (orange `--accent: #FF812C`, warm
+  near-white canvas, IBM Plex Sans Arabic). Recolor via the `:root` tokens
+  in `theme.css`; never hard-code colors on a slide.
 
 ## Language & direction
 
@@ -336,7 +349,8 @@ Don't invent feedback or act on records already marked `done`.
 
 - **Onboarded:** no
 - **Presenter name / role:** _(not set — ask during onboarding)_
-- **Default language:** _(not set)_
-- **Accent color:** `#7B2E39` (Editorial burgundy)
+- **Default language:** Arabic (RTL) by default
+- **Accent color:** `#FF812C` (Extend Academy orange)
+- **Logo:** `assets/extend-academy-logo.png`
 - **Typical deck types:** _(not set)_
 - **Footer text:** _(not set)_

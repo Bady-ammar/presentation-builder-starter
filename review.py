@@ -194,12 +194,23 @@ class Handler(BaseHTTPRequestHandler):
         return self._json(200, {"ok": True})
 
     def _post_edit(self, body):
-        for k in ("slidePath", "oldText", "newText"):
-            if k not in body:
-                return self._json(400, {"error": f"missing:{k}"})
+        if not body.get("slidePath"):
+            return self._json(400, {"error": "missing:slidePath"})
         slide_path = body["slidePath"]
-        old, new = body["oldText"], body["newText"]
+        rich = bool(body.get("richEdit"))
+        if rich:
+            for k in ("oldInner", "newInner"):
+                if k not in body:
+                    return self._json(400, {"error": f"missing:{k}"})
+            old, new = body["oldInner"], body["newInner"]
+        else:
+            for k in ("oldText", "newText"):
+                if k not in body:
+                    return self._json(400, {"error": f"missing:{k}"})
+            old, new = body["oldText"], body["newText"]
 
+        # Apply only when the old string occurs exactly once — an unambiguous
+        # swap. (Works the same whether `old` is plain text or an HTML span.)
         target = safe_target(slide_path)
         applied = False
         reason = "no_file"
@@ -221,10 +232,13 @@ class Handler(BaseHTTPRequestHandler):
             "slidePath": slide_path,
             "slideIndex": body.get("slideIndex", 0),
             "editId": body.get("editId", ""),
-            "oldText": old,
-            "newText": new,
             "result": reason,
         }
+        if rich:
+            rec["richEdit"] = True
+            rec["oldInner"], rec["newInner"] = old, new
+        else:
+            rec["oldText"], rec["newText"] = old, new
         self._append_review(slide_path, rec)
         if applied:
             print(f"  ✎ edit applied on slide {body.get('slideIndex',0)+1}: {old[:40]} → {new[:40]}")

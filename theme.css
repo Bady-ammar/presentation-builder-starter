@@ -11,27 +11,30 @@
    ============================================================ */
 
 :root {
+  /* ---- Extend Academy palette ---- */
   /* Canvas */
-  --bg:          #FBF7F0;   /* warm off-white                  */
-  --bg-tint:     #F2E9DC;   /* deeper panel / section divider  */
-  --bg-ink:      #221C1A;   /* dark slides                     */
+  --bg:          #FCFAF6;   /* warm near-white                 */
+  --bg-tint:     #F4EFE9;   /* deeper panel / section divider  */
+  --bg-ink:      #050505;   /* dark slides                     */
 
   /* Type */
-  --ink:         #211A18;   /* near-black, warm                */
-  --ink-soft:    #6B5F57;   /* secondary text                  */
-  --ink-faint:   #9A8E84;   /* captions, page numbers          */
-  --on-ink:      #F4ECE2;   /* text on dark slides             */
+  --ink:         #050505;   /* near-black                      */
+  --ink-soft:    #2D2D2D;   /* secondary text                  */
+  --ink-faint:   #6F6A64;   /* captions, page numbers          */
+  --on-ink:      #F4EFE9;   /* text on dark slides             */
 
-  /* Accent */
-  --accent:      #7B2E39;   /* muted burgundy                  */
-  --accent-soft: #A8505C;
+  /* Accent — Extend Academy orange */
+  --accent:      #FF812C;
+  --accent-soft: #FFA559;
 
   /* Lines */
-  --rule:        #E4D8C7;
+  --rule:        #E6DFD5;
 
-  /* Fonts — loaded via <link> in the slide file head */
-  --serif: "Source Serif 4", "Amiri", Georgia, "Times New Roman", serif;
-  --sans:  "Inter", "Noto Sans Arabic", system-ui, -apple-system, Segoe UI, sans-serif;
+  /* Fonts — loaded via <link> in the slide file head.
+     Extend Academy uses IBM Plex Sans Arabic throughout (covers Latin too),
+     so "serif" headings and "sans" body share the family for one clean voice. */
+  --serif: "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans:  "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
 
   /* Geometry */
   --pad: clamp(48px, 6vw, 120px);
@@ -207,13 +210,24 @@ html, body {
   z-index: 50;
 }
 
+/* Brand mark — a small logo lockup, top-left, on a faint chip so it reads on
+   light AND dark slides. Swap the <img src> (or remove it) to rebrand. */
+.deck-logo {
+  position: fixed; top: 18px; left: 24px; z-index: 45;
+  height: 30px; width: auto; display: block;
+  padding: 7px 12px; border-radius: 10px;
+  background: rgba(255,255,255,0.72);
+  box-shadow: 0 1px 6px rgba(5,5,5,0.08);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+
 /* Inline code / file names keep a monospace face and stay LTR */
 code, .mono {
   font-family: "SF Mono", "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
   font-size: 0.85em;
   direction: ltr;
   unicode-bidi: isolate;
-  background: rgba(123,46,57,0.08);
+  background: rgba(255,129,44,0.12);
   color: var(--accent);
   padding: 2px 7px;
   border-radius: 5px;
@@ -224,7 +238,7 @@ code, .mono {
   @page { size: 1280px 720px; margin: 0; }
   html, body { background: #fff; }
   #deck { position: static; }
-  #progress, #page-num, .deck-footer { display: none; }
+  #progress, #page-num, .deck-footer, .deck-logo { display: none; }
   .slide { display: flex !important; position: relative; inset: auto;
            width: 1280px; height: 720px; page-break-after: always; break-after: page; }
   .fragment { opacity: 1 !important; transform: none !important; }
