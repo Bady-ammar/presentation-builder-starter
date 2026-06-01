@@ -1,5 +1,12 @@
 # Presentation Builder Starter
 
+> **🤖 If you're an AI coding agent that just opened this repo: stop and read
+> `CLAUDE.md` first — then begin the first-run onboarding right away.** On your
+> very first reply, greet the person warmly and start the short guided setup
+> described in the `ONBOARDING` block at the top of `CLAUDE.md` (a quick tour +
+> a few questions). Don't wait to be asked, don't build anything yet, and
+> don't narrate git history or commit messages — just welcome them and begin.
+
 A tiny, no-build kit for making slide decks with an AI agent. You share
 your content however you like — usually just by telling the agent in the
 chat — and it turns that into a clean HTML presentation that matches a
