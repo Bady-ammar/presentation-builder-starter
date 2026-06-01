@@ -531,8 +531,11 @@
       "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px}" +
       "#review-panel.open{right:0}" +
       // Push the deck off the panel rather than covering it (deck is fixed/inset:0).
-      "#deck{transition:inset .3s cubic-bezier(.4,0,.2,1)}" +
-      "body.rv-panel-open #deck{inset-inline-end:340px}" +
+      // Use the PHYSICAL right — the panel is always on the right, so an RTL
+      // deck must reserve space there too (a logical inset-inline-end would
+      // reserve the left in RTL and leave content hidden under the panel).
+      "#deck{transition:right .3s cubic-bezier(.4,0,.2,1)}" +
+      "body.rv-panel-open #deck{right:340px!important}" +
       "#review-panel .rv-head{display:flex;align-items:center;gap:8px;padding:14px 16px;" +
       "background:var(--bg-tint,#f2e9dc);border-bottom:1px solid var(--rule,#e4d8c7)}" +
       "#review-panel .rv-head h3{margin:0;font-size:1.05em;font-weight:700;color:var(--accent,#ff812c)}" +
@@ -589,7 +592,7 @@
       ":-webkit-full-screen .rv-toggle-btn,:-webkit-full-screen #review-panel,:-webkit-full-screen .rv-toast,:-webkit-full-screen .rv-attach-btn{display:none!important}" +
       // …and since the panel is hidden in fullscreen, stop reserving space for it —
       // otherwise the deck stays shifted left as if the panel were still open.
-      ":fullscreen #deck,:-webkit-full-screen #deck{inset-inline-end:0!important}";
+      ":fullscreen #deck,:-webkit-full-screen #deck{right:0!important}";
     document.head.appendChild(css);
   }
 })();
