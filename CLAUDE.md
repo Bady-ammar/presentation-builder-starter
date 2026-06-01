@@ -33,6 +33,10 @@ their friendly guide, not an IT manual. So:
     that worked"). If something needs installing (like Python), offer to
     handle it and explain in one friendly line why.
   - Never make them feel behind. There are no wrong answers here.
+  - **Don't narrate the repo.** Never read out or summarize git history,
+    the latest commit message, a changelog, "what's new", or how the kit
+    was built. That's developer noise and it's irrelevant to them. Just
+    greet and onboard — they came to make a presentation, not to review code.
 
 Now, the flow:
 
