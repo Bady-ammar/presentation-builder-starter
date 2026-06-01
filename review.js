@@ -351,9 +351,13 @@
     var r = hoverEl.getBoundingClientRect();
     if (r.width === 0 && r.height === 0) { attachBtn.classList.remove("visible"); return; }
     var isRtl = getComputedStyle(hoverEl).direction === "rtl";
-    attachBtn.style.top = Math.max(4, r.top - 30) + "px";
-    if (isRtl) { attachBtn.style.right = (window.innerWidth - r.right) + "px"; attachBtn.style.left = "auto"; }
-    else { attachBtn.style.left = r.left + "px"; attachBtn.style.right = "auto"; }
+    // Sit just inside the element's top corner so the button always overlaps
+    // its target: there's no gap to cross on the way to a click (so it can't
+    // vanish under the cursor), and it can never float off-screen above an
+    // element that's near the top edge.
+    attachBtn.style.top = Math.max(4, r.top + 4) + "px";
+    if (isRtl) { attachBtn.style.right = Math.max(4, window.innerWidth - r.right + 4) + "px"; attachBtn.style.left = "auto"; }
+    else { attachBtn.style.left = Math.max(4, r.left + 4) + "px"; attachBtn.style.right = "auto"; }
     attachBtn.classList.add("visible");
   }
 
