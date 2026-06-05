@@ -97,10 +97,23 @@
      All self-contained, no libraries. (Tour-only, like above.)
      ============================================================ */
 
+  /* Give the live previews the stage: a wider content column + shorter slide
+     padding on the demo slides, so the embed/globe/map/chart fills the space. */
+  .slide[data-live], .slide[data-globe-slide], .slide[data-whatif], .slide[data-map] {
+    padding-block: clamp(20px, 3.2vh, 46px);
+  }
+  .slide[data-live]  > *, .slide[data-globe-slide] > *,
+  .slide[data-whatif] > *, .slide[data-map] > * { max-width: min(1340px, 93vw); }
+  /* Keep the caption a centered, readable measure so it never slides under the
+     corner chrome; and hide the footer here — the preview is the star. */
+  .slide[data-live] .chart-note, .slide[data-globe-slide] .chart-note,
+  .slide[data-whatif] .chart-note, .slide[data-map] .chart-note { max-width: 1040px; }
+  body.demo-stage .deck-footer { display: none; }
+
   /* —— 1 · A real, live website embedded in the slide —— */
-  .live-window { margin-top: 22px; border-radius: 14px; overflow: hidden; border: 1px solid var(--rule);
+  .live-window { margin-top: 14px; border-radius: 14px; overflow: hidden; border: 1px solid var(--rule);
                  box-shadow: 0 18px 50px rgba(5,5,5,.16); background: #fff;
-                 display: flex; flex-direction: column; height: clamp(300px, 56vh, 600px); }
+                 display: flex; flex-direction: column; height: clamp(360px, 70vh, 760px); }
   .browser-bar { flex: none; height: 34px; display: flex; align-items: center; gap: 10px;
                  padding-inline: 12px; background: #ededed; border-bottom: 1px solid #dcdcdc; }
   .browser-bar .dots { display: inline-flex; gap: 6px; flex: none; }
@@ -121,7 +134,7 @@
   .live-embed.loaded { opacity: 1; }
 
   /* —— 2 · Interactive 3D globe (Three.js via globe.gl, loaded on arrival) —— */
-  .globe-holder { position: relative; height: clamp(300px, 56vh, 600px); margin-top: 6px;
+  .globe-holder { position: relative; height: clamp(360px, 70vh, 760px); margin-top: 4px;
                   border-radius: 16px; overflow: hidden; border: 1px solid #1d1f2b;
                   background: radial-gradient(circle at 50% 38%, #11131f 0%, #07070d 72%);
                   box-shadow: 0 18px 50px rgba(5,5,5,.22); }
@@ -133,7 +146,7 @@
   .globe-holder.ready .globe-loading { display: none; }
 
   /* —— 3 · Live investment model (three sliders redraw a stacked area) —— */
-  .whatif { display: flex; gap: clamp(24px, 4vw, 52px); align-items: center; margin-top: 22px; }
+  .whatif { display: flex; gap: clamp(24px, 4vw, 52px); align-items: center; margin-top: 14px; }
   .whatif-controls { flex: 0 0 40%; min-width: 0; }
   .whatif-controls label { display: flex; justify-content: space-between; align-items: baseline;
                            font-size: clamp(.92rem, 1.4vw, 1.12rem); color: var(--ink-soft); margin-bottom: 5px; }
@@ -144,7 +157,7 @@
   .iv-sub { font-size: clamp(.88rem, 1.3vw, 1.05rem); color: var(--ink-faint); margin-top: 4px; }
   .iv-sub .accent { color: var(--accent); font-weight: 600; }
   .whatif-chart-wrap { flex: 1 1 0; min-width: 0; }
-  .whatif-chart { width: 100%; height: clamp(200px, 46vh, 380px); display: block; }
+  .whatif-chart { width: 100%; height: clamp(240px, 52vh, 460px); display: block; }
   .iv-bar-prin   { fill: var(--accent); opacity: .92; }
   .iv-bar-growth { fill: url(#iv-grad-growth); }
   .iv-bar-prin, .iv-bar-growth { transition: y .28s cubic-bezier(.2,.8,.2,1), height .28s cubic-bezier(.2,.8,.2,1); }
@@ -158,7 +171,7 @@
   .iv-key-growth { background: linear-gradient(#FFB877, #FF812C); }
 
   /* —— 4 · Embedded live map —— */
-  .map-frame { margin-top: 22px; height: clamp(300px, 56vh, 560px); border-radius: 14px; overflow: hidden;
+  .map-frame { margin-top: 14px; height: clamp(340px, 66vh, 720px); border-radius: 14px; overflow: hidden;
                border: 1px solid var(--rule); box-shadow: 0 18px 50px rgba(5,5,5,.16); background: var(--bg-tint); }
   .map-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
 
@@ -167,6 +180,41 @@
   .particles-canvas { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none;
                       margin: 0; z-index: 0; pointer-events: none; }
   .particles-caption { position: relative; z-index: 2; pointer-events: none; }
+
+  /* —— Ice-breaker: "Fact or Fiction?" — read it, vote, then reveal —— */
+  .sc-stage { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 18px; }
+  .sc-card { position: relative; width: min(620px, 92%); min-height: clamp(170px, 26vh, 230px);
+             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+             text-align: center; cursor: pointer; user-select: none; padding: 26px 32px;
+             border-radius: 18px; border: 1px solid var(--rule);
+             background: linear-gradient(160deg, #ffffff, var(--bg-tint));
+             box-shadow: 0 16px 40px rgba(5,5,5,.14); transition: box-shadow .2s ease, transform .2s ease; }
+  .sc-card:hover { box-shadow: 0 22px 54px rgba(5,5,5,.20); transform: translateY(-2px); }
+  .sc-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .sc-card.deal { animation: sc-deal .5s cubic-bezier(.25,.85,.3,1); }
+  @keyframes sc-deal {
+    0%   { transform: translateY(0) scale(1) rotate(0); }
+    42%  { transform: translateY(-16px) scale(.9) rotate(-3deg); opacity: .2; }
+    100% { transform: translateY(0) scale(1) rotate(0); opacity: 1; }
+  }
+  .sc-tag  { font-family: var(--sans); font-weight: 700; letter-spacing: .04em; color: var(--accent);
+             font-size: clamp(.82rem, 1.2vw, .98rem); min-height: 1.2em; }
+  .sc-fact { font-family: var(--serif); font-weight: 600; color: var(--ink);
+             font-size: clamp(1.2rem, 2.2vw, 1.7rem); line-height: 1.45; }
+  .sc-verdict { font-family: var(--serif); font-weight: 700; font-size: clamp(1.15rem, 2.1vw, 1.55rem);
+                opacity: 0; max-height: 0; overflow: hidden; transition: opacity .25s ease; }
+  .sc-card.revealed .sc-verdict { opacity: 1; max-height: 2.4em; margin-top: 2px; }
+  .sc-verdict.is-true  { color: #2f8a4f; }
+  .sc-verdict.is-false { color: #c2543a; }
+  .sc-note { font-size: clamp(.9rem, 1.4vw, 1.08rem); color: var(--ink-soft); line-height: 1.5;
+             max-width: 48ch; opacity: 0; max-height: 0; overflow: hidden; transition: opacity .25s ease; }
+  .sc-card.revealed .sc-note { opacity: 1; max-height: 6em; margin-top: 2px; }
+  .sc-btn { font-family: var(--sans); font-weight: 600; font-size: clamp(.95rem, 1.5vw, 1.15rem);
+            color: #fff; background: var(--accent); border: none; border-radius: 12px;
+            padding: 12px 28px; cursor: pointer; transition: filter .2s ease, transform .08s ease; }
+  .sc-btn:hover { filter: brightness(1.06); }
+  .sc-btn:active { transform: translateY(1px); }
+  .sc-count { font-size: .85rem; color: var(--ink-faint); min-height: 1.1em; }
 </style>
 </head>
 <body>
@@ -284,7 +332,7 @@
   <section class="slide slide-section" dir="rtl">
     <p class="index">✦</p>
     <h2 class="t-xl mt-sm">السحر في الحكاية</h2>
-    <p class="t-md mt-sm">أجملُ العروض لا تُعرَض… تُروى. وأبقى ما يَعلَق في الذاكرة لحظةٌ صغيرةٌ تُدهش، فيلتفت الجمهور ويعيش القصّة معك.</p>
+    <p class="t-md mt-sm">أجملُ العروض لا تُعرَض… تُروى. وأكثرُ ما يَعلَق في الذاكرة لحظةٌ خاطفةٌ تُدهِش، فيلتفت الجمهور ويعيش القصّة معك.</p>
   </section>
 
   <!-- لِمَ الحكاية · القَصَص في الإسلام -->
@@ -377,6 +425,23 @@
       <p class="t-xl">قبل الكلمة… المزاج.</p>
       <p class="t-md" style="color:#C9BCAE">الأجواء تهيّئ القلوب قبل أن تنطق. حرّك الفأرة، ودَع اللحظة تتنفّس.</p>
     </div>
+  </section>
+
+  <!-- لعبة كسر الجمود · حقيقة أم خيال؟ -->
+  <section class="slide" dir="rtl" data-factfiction>
+    <p class="kicker">لنكسر الجمود ✨</p>
+    <h2 class="t-lg">حقيقة… أم خيال؟</h2>
+    <div class="sc-stage">
+      <div class="sc-card" data-ff-card role="button" tabindex="0" aria-label="اكشف الإجابة">
+        <span class="sc-tag" data-ff-tag>صوّتوا برفع الأيدي 🙋</span>
+        <span class="sc-fact" data-ff-claim>—</span>
+        <span class="sc-verdict" data-ff-verdict></span>
+        <span class="sc-note" data-ff-note></span>
+      </div>
+      <button class="sc-btn" data-ff-btn type="button">اكشف الإجابة 👀</button>
+      <p class="sc-count" data-ff-count></p>
+    </div>
+    <p class="chart-note">اقرأ العبارة بصوتٍ عالٍ، ودَع الجميع يصوّت: حقيقةٌ أم خيال؟ ثم اكشف الإجابة — والطُّرفة في التفسير.</p>
   </section>
 
   <!-- 5 · أداة المراجعة -->
@@ -731,7 +796,11 @@
     return { start: start };
   }
 
-  function render(slide) { renderBars(slide); renderLine(slide); renderMetrics(slide); renderConfetti(slide); renderMap(slide); renderLive(slide); renderGlobe(slide); renderWhatif(slide); renderParticles(slide); }
+  function render(slide) {
+    document.body.classList.toggle('demo-stage', !!(slide.matches && slide.matches('[data-live],[data-globe-slide],[data-whatif],[data-map]')));
+    renderBars(slide); renderLine(slide); renderMetrics(slide); renderConfetti(slide);
+    renderMap(slide); renderLive(slide); renderGlobe(slide); renderWhatif(slide); renderParticles(slide);
+  }
 
   var obs = new MutationObserver(function (muts) {
     muts.forEach(function (m) {
@@ -891,6 +960,72 @@
     yearsIn.addEventListener('input', compute);
     slide.__wiCompute = compute;
     compute();
+  })();
+
+  // Ice-breaker · Fact or Fiction: read the claim, vote, then reveal the verdict.
+  (function bindFactFiction() {
+    var slide = document.querySelector('[data-factfiction]');
+    if (!slide) return;
+    var card = slide.querySelector('[data-ff-card]');
+    if (!card) return;
+    var tagEl = slide.querySelector('[data-ff-tag]'),
+        claimEl = slide.querySelector('[data-ff-claim]'),
+        verdictEl = slide.querySelector('[data-ff-verdict]'),
+        noteEl = slide.querySelector('[data-ff-note]'),
+        btn = slide.querySelector('[data-ff-btn]'),
+        countEl = slide.querySelector('[data-ff-count]');
+    var CLAIMS = [
+      { t: 'للأخطبوط ثلاثة قلوب.', real: true, note: 'حقيقة — واثنان منها يتوقّفان عن العمل حين يسبح، فيتعب بسرعة!' },
+      { t: 'نحن لا نستخدم سوى ١٠٪ من الدماغ.', real: false, note: 'خيال — خرافةٌ شائعة؛ نستخدم الدماغ كلَّه، وإن بدرجاتٍ متفاوتة.' },
+      { t: 'غروبُ الشمس على المرّيخ لونُه أزرق.', real: true, note: 'حقيقة — غبار المرّيخ يبعثر الضوء فيُزرقّ الغروب.' },
+      { t: 'سور الصين العظيم يُرى بالعين المجرّدة من الفضاء.', real: false, note: 'خيال — أضيقُ من أن يُرى بالعين المجرّدة من المدار.' },
+      { t: 'العسل لا يفسد أبدًا.', real: true, note: 'حقيقة — وُجد عسلٌ صالحٌ للأكل في مقابر عمرها آلاف السنين.' },
+      { t: 'ذاكرةُ السمكة الذهبية ثلاث ثوانٍ فقط.', real: false, note: 'خيال — ذاكرتها تمتدّ لأشهر، وتتعلّم وتميّز الأشكال.' },
+      { t: 'يومٌ على كوكب الزُّهرة أطولُ من سنته كاملة.', real: true, note: 'حقيقة — دورتُه حول نفسه أبطأ من دورته حول الشمس.' },
+      { t: 'الخفافيش عمياء.', real: false, note: 'خيال — كلُّها تُبصر، وبعضها يرى ليلًا أفضل منّا.' },
+      { t: 'قلبُ الجمبري يقع في رأسه.', real: true, note: 'حقيقة — قلبُه خلف عينيه مباشرة، قريبٌ من رأسه.' },
+      { t: 'الحرباء تغيّر لونها لتختفي في محيطها.', real: false, note: 'خيال — تغيّره غالبًا للتواصل وتنظيم الحرارة والمزاج، لا للتخفّي.' },
+      { t: 'برج إيفل يطول في الصيف نحو ١٥ سم.', real: true, note: 'حقيقة — حرارةُ الصيف تُمدّد حديده فيرتفع قليلًا.' },
+      { t: 'يضرب البرقُ المكان نفسه مرّةً واحدة فقط.', real: false, note: 'خيال — يضرب الأماكن العالية مرارًا، كأبراج المدن.' },
+      { t: 'لا ينتقل الصوت في الفضاء.', real: true, note: 'حقيقة — لا هواءَ هناك يحمل الموجات، فالفضاء صامت.' },
+      { t: 'ينمو الشعر والأظافر بعد الوفاة.', real: false, note: 'خيال — الجلد ينكمش فيبدو كذلك، لكنّها لا تنمو فعلًا.' }
+    ];
+    for (var i = CLAIMS.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var s = CLAIMS[i]; CLAIMS[i] = CLAIMS[j]; CLAIMS[j] = s; }
+    var idx = -1, shown = 0, revealed = false, busy = false;
+    function load() {
+      idx = (idx + 1) % CLAIMS.length; shown++;
+      claimEl.textContent = CLAIMS[idx].t;
+      verdictEl.textContent = ''; verdictEl.className = 'sc-verdict';
+      noteEl.textContent = '';
+      card.classList.remove('revealed');
+      tagEl.textContent = 'صوّتوا برفع الأيدي 🙋';
+      btn.textContent = 'اكشف الإجابة 👀';
+      countEl.textContent = 'عبارة ' + shown;
+      revealed = false;
+    }
+    function reveal() {
+      var c = CLAIMS[idx];
+      revealed = true;
+      card.classList.add('revealed');
+      verdictEl.className = 'sc-verdict ' + (c.real ? 'is-true' : 'is-false');
+      verdictEl.textContent = c.real ? '✓ حقيقة' : '✗ خيال';
+      noteEl.textContent = c.note;
+      tagEl.textContent = '';
+      btn.textContent = 'التالي ←';
+      if (c.real) { tone(523.25, 0, 0.16, 'sine', 0.12); chord([659.25, 783.99, 1046.5], 'triangle', 0.1, 0.05); }
+      else { tone(220, 0, 0.22, 'sawtooth', 0.09); tone(174.61, 0.16, 0.34, 'sawtooth', 0.09); }
+    }
+    function next() {
+      if (busy) return; busy = true;
+      card.classList.remove('deal'); void card.offsetWidth; card.classList.add('deal');
+      tone(420, 0, 0.06, 'square', 0.05);
+      setTimeout(load, 200);
+      setTimeout(function () { busy = false; }, 520);
+    }
+    btn.addEventListener('click', function () { if (revealed) next(); else reveal(); });
+    card.addEventListener('click', function () { if (!revealed) reveal(); });
+    card.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); if (revealed) next(); else reveal(); } });
+    load();
   })();
 })();
 </script>
