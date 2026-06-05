@@ -89,6 +89,84 @@
   @keyframes quiz-shake { 10%,90%{transform:translateX(-2px)} 20%,80%{transform:translateX(5px)}
                           30%,50%,70%{transform:translateX(-9px)} 40%,60%{transform:translateX(9px)} }
   @keyframes quiz-pop { 0%{transform:scale(1)} 45%{transform:scale(1.05)} 100%{transform:scale(1)} }
+
+  /* ============================================================
+     EXTREME demos — how far a slide can go when it's a full web
+     page: side-by-side site compare, CSS 3D, a live what-if
+     model, an embedded live map, a generative particle field.
+     All self-contained, no libraries. (Tour-only, like above.)
+     ============================================================ */
+
+  /* —— 1 · A real, live website embedded in the slide —— */
+  .live-window { margin-top: 22px; border-radius: 14px; overflow: hidden; border: 1px solid var(--rule);
+                 box-shadow: 0 18px 50px rgba(5,5,5,.16); background: #fff;
+                 display: flex; flex-direction: column; height: clamp(300px, 56vh, 600px); }
+  .browser-bar { flex: none; height: 34px; display: flex; align-items: center; gap: 10px;
+                 padding-inline: 12px; background: #ededed; border-bottom: 1px solid #dcdcdc; }
+  .browser-bar .dots { display: inline-flex; gap: 6px; flex: none; }
+  .browser-bar .dots i { width: 9px; height: 9px; border-radius: 50%; background: #c9c9c9; }
+  .browser-bar .dots i:nth-child(1){ background:#ff5f57; }
+  .browser-bar .dots i:nth-child(2){ background:#febc2e; }
+  .browser-bar .dots i:nth-child(3){ background:#28c840; }
+  .browser-bar .url { font-family: var(--sans); font-size: .82rem; color: #555; direction: ltr;
+                      background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 2px 12px;
+                      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .browser-bar .live-pill { margin-inline-start: auto; flex: none; font-family: var(--sans);
+                            font-size: .72rem; font-weight: 600; color: #2f8a4f;
+                            background: rgba(111,207,151,.18); border-radius: 20px; padding: 2px 10px; }
+  .live-frame { position: relative; flex: 1 1 0; min-height: 0; background: var(--bg-tint); }
+  .live-fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+  .live-embed { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #fff;
+                opacity: 0; transition: opacity .5s ease; }
+  .live-embed.loaded { opacity: 1; }
+
+  /* —— 2 · Interactive 3D globe (Three.js via globe.gl, loaded on arrival) —— */
+  .globe-holder { position: relative; height: clamp(300px, 56vh, 600px); margin-top: 6px;
+                  border-radius: 16px; overflow: hidden; border: 1px solid #1d1f2b;
+                  background: radial-gradient(circle at 50% 38%, #11131f 0%, #07070d 72%);
+                  box-shadow: 0 18px 50px rgba(5,5,5,.22); }
+  .globe-holder canvas { display: block; }
+  .globe-hint { position: absolute; inset-inline-start: 16px; inset-block-end: 12px; z-index: 3;
+                font-family: var(--sans); font-size: .8rem; color: rgba(255,255,255,.6); pointer-events: none; }
+  .globe-loading { position: absolute; inset: 0; display: grid; place-items: center; z-index: 2;
+                   color: rgba(255,255,255,.58); font-family: var(--sans); font-size: .95rem; }
+  .globe-holder.ready .globe-loading { display: none; }
+
+  /* —— 3 · Live investment model (three sliders redraw a stacked area) —— */
+  .whatif { display: flex; gap: clamp(24px, 4vw, 52px); align-items: center; margin-top: 22px; }
+  .whatif-controls { flex: 0 0 40%; min-width: 0; }
+  .whatif-controls label { display: flex; justify-content: space-between; align-items: baseline;
+                           font-size: clamp(.92rem, 1.4vw, 1.12rem); color: var(--ink-soft); margin-bottom: 5px; }
+  .whatif-controls label strong { color: var(--accent); font-family: var(--serif); font-size: 1.15em; }
+  .whatif-controls input[type=range] { width: 100%; accent-color: var(--accent); height: 24px; cursor: ew-resize; margin-bottom: 12px; }
+  .iv-figures { margin-top: 8px; }
+  .iv-figures .figure { font-size: clamp(2.1rem, 5vw, 3.4rem); }
+  .iv-sub { font-size: clamp(.88rem, 1.3vw, 1.05rem); color: var(--ink-faint); margin-top: 4px; }
+  .iv-sub .accent { color: var(--accent); font-weight: 600; }
+  .whatif-chart-wrap { flex: 1 1 0; min-width: 0; }
+  .whatif-chart { width: 100%; height: clamp(200px, 46vh, 380px); display: block; }
+  .iv-bar-prin   { fill: var(--accent); opacity: .92; }
+  .iv-bar-growth { fill: url(#iv-grad-growth); }
+  .iv-bar-prin, .iv-bar-growth { transition: y .28s cubic-bezier(.2,.8,.2,1), height .28s cubic-bezier(.2,.8,.2,1); }
+  .iv-goal-line  { stroke: var(--ink-faint); stroke-width: 1.4; stroke-dasharray: 5 4; opacity: .75;
+                   transition: y1 .28s ease, y2 .28s ease; }
+  .iv-goal-note  { width: 100%; margin-top: 2px; color: var(--ink-faint); }
+  .iv-legend { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px;
+               font-size: clamp(.8rem, 1.2vw, .96rem); color: var(--ink-faint); }
+  .iv-key { width: 13px; height: 13px; border-radius: 3px; display: inline-block; }
+  .iv-key-prin   { background: var(--accent); opacity: .8; }
+  .iv-key-growth { background: linear-gradient(#FFB877, #FF812C); }
+
+  /* —— 4 · Embedded live map —— */
+  .map-frame { margin-top: 22px; height: clamp(300px, 56vh, 560px); border-radius: 14px; overflow: hidden;
+               border: 1px solid var(--rule); box-shadow: 0 18px 50px rgba(5,5,5,.16); background: var(--bg-tint); }
+  .map-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+  /* —— 5 · Generative particle field (lives behind a dark statement) —— */
+  .slide[data-particles] { overflow: hidden; }
+  .particles-canvas { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none;
+                      margin: 0; z-index: 0; pointer-events: none; }
+  .particles-caption { position: relative; z-index: 2; pointer-events: none; }
 </style>
 </head>
 <body>
@@ -199,6 +277,105 @@
       <p class="kicker">تفاعليّة بلا حدود</p>
       <p class="t-xl">حرّك الفأرة هنا… وانقر. 🔊</p>
       <p class="t-md" style="color:#C9BCAE">حركةٌ وصوتٌ وألوان — الشريحة صفحة ويب كاملة، تتفاعل ولا تُعرض فحسب. (ارفع صوت جهازك.)</p>
+    </div>
+  </section>
+
+  <!-- فاصل · إلى أقصى حدّ -->
+  <section class="slide slide-section" dir="rtl">
+    <p class="index">✦</p>
+    <h2 class="t-xl mt-sm">السحر في الحكاية</h2>
+    <p class="t-md mt-sm">أجملُ العروض لا تُعرَض… تُروى. وأبقى ما يَعلَق في الذاكرة لحظةٌ صغيرةٌ تُدهش، فيلتفت الجمهور ويعيش القصّة معك.</p>
+  </section>
+
+  <!-- لِمَ الحكاية · القَصَص في الإسلام -->
+  <section class="slide slide-statement" dir="rtl">
+    <p class="kicker">ولِمَ الحكاية؟</p>
+    <p class="t-xl">«لَقَدْ كَانَ فِي قَصَصِهِمْ عِبْرَةٌ لِأُولِي الْأَلْبَابِ»</p>
+    <p class="t-sm mt-sm" style="color:#B3A593">سورة يوسف · الآية ١١١</p>
+    <p class="t-md mt-md">حتى الوحيُ اختار القصّة لتبلغ القلوب، وسمّى اللهُ أجملَها «أحسنَ القصص». فإن أردتَ لكلامك أن يَرسخ، فاحكِه قصّة — وهذه خمسُ لحظاتٍ تُحييها.</p>
+  </section>
+
+  <!-- قصوى · ١ · موقع حيّ داخل الشريحة -->
+  <section class="slide" dir="rtl" data-live>
+    <p class="kicker">١ · أرِهم، لا تُخبرهم</p>
+    <h2 class="t-lg">أحضِر العالم الحقيقيّ إلى قصّتك</h2>
+    <div class="live-window">
+      <div class="browser-bar">
+        <span class="dots"><i></i><i></i><i></i></span>
+        <span class="url">gathern.co</span>
+        <span class="live-pill">● مباشر</span>
+      </div>
+      <div class="live-frame">
+        <img class="live-fallback" src="assets/gathern-home.png" alt="لقطة احتياطية من gathern.co">
+        <iframe class="live-embed" data-live-frame title="موقع gathern.co حيّ"
+                referrerpolicy="no-referrer-when-downgrade" data-src="https://gathern.co/"></iframe>
+      </div>
+    </div>
+    <p class="chart-note">بدل أن تصف، دَع جمهورك يلمس الشيء نفسه حيًّا أمامه — تصفّحه معهم. لحظةُ «انظروا!» تبقى في القلب أطول من ألف كلمة.</p>
+  </section>
+
+  <!-- قصوى · ٢ · كرة أرضيّة ثلاثيّة الأبعاد (WebGL) -->
+  <section class="slide" dir="rtl" data-globe-slide>
+    <p class="kicker">٢ · لحظة دهشة</p>
+    <h2 class="t-lg">كوكبٌ يدور بين يديك</h2>
+    <div class="globe-holder" data-globe>
+      <div class="globe-loading">…لحظة، ويبدأ المشهد</div>
+      <div class="globe-hint">أدِرْه بإصبعك</div>
+    </div>
+    <p class="chart-note">بعض الأفكار أكبر من أن تُقال — تحتاج أن تُرى وتُلمَس. أدِر الكوكب، وتابِع الرحلة تنطلق من الرياض إلى العالم.</p>
+  </section>
+
+  <!-- قصوى · ٣ · نموذج استثمار حيّ -->
+  <section class="slide" dir="rtl" data-whatif>
+    <p class="kicker">٣ · دَعهم يرون المستقبل</p>
+    <h2 class="t-lg">حرّكْ… فيتغيّر الحلم أمامهم</h2>
+    <div class="whatif">
+      <div class="whatif-controls">
+        <label>الإيداع الشهريّ <strong data-iv-contrib>1,000</strong></label>
+        <input type="range" min="0" max="5000" step="100" value="1000" data-iv-contrib-input aria-label="الإيداع الشهريّ">
+        <label>العائد السنويّ <strong data-iv-rate>7%</strong></label>
+        <input type="range" min="0" max="15" step="0.5" value="7" data-iv-rate-input aria-label="العائد السنويّ">
+        <label>عدد السنوات <strong data-iv-years>20</strong></label>
+        <input type="range" min="1" max="40" step="1" value="20" data-iv-years-input aria-label="عدد السنوات">
+        <div class="iv-figures">
+          <div class="metric"><div class="figure" data-iv-final>—</div><div class="label">الرصيد بعد المدّة</div></div>
+          <div class="iv-sub"><span data-iv-contributed>—</span> إجمالي الإيداعات · <span class="accent" data-iv-growth>—</span> أرباح مركّبة</div>
+        </div>
+      </div>
+      <div class="whatif-chart-wrap">
+        <svg class="whatif-chart" data-iv-chart viewBox="0 0 600 300" preserveAspectRatio="none" role="img" aria-label="نموّ الاستثمار عبر الزمن نحو الهدف">
+          <defs>
+            <linearGradient id="iv-grad-growth" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#FFB877"></stop><stop offset="1" stop-color="#FF812C"></stop>
+            </linearGradient>
+          </defs>
+          <g data-iv-bars></g>
+          <line class="iv-goal-line" data-iv-goal x1="0" x2="600" y1="0" y2="0"></line>
+        </svg>
+        <div class="iv-legend"><span class="iv-key iv-key-prin"></span> أصل الإيداعات <span class="iv-key iv-key-growth"></span> أرباح مركّبة <span class="iv-goal-note">— الخطّ المتقطّع: الحلم (1,000,000)</span></div>
+      </div>
+    </div>
+    <p class="chart-note">الأرقام وحدها تُنسى؛ أمّا أن يرى الناس حلمهم يكبر مع كلّ حركة — فتلك قصّةٌ يعيشونها. (أرقام للتوضيح.)</p>
+  </section>
+
+  <!-- قصوى · ٤ · خريطة حيّة -->
+  <section class="slide" dir="rtl" data-map>
+    <p class="kicker">٤ · خُذهم إلى المكان</p>
+    <h2 class="t-lg">لا تَصِف المكان… زُرْه معهم</h2>
+    <div class="map-frame">
+      <iframe data-map-frame title="خريطة الرياض الحيّة" referrerpolicy="no-referrer-when-downgrade"
+              data-src="https://www.openstreetmap.org/export/embed.html?bbox=46.5500%2C24.5500%2C46.8500%2C24.8500&amp;layer=mapnik&amp;marker=24.7136%2C46.6753"></iframe>
+    </div>
+    <p class="chart-note">حرّك الخريطة وكبّرها، فكأنّكم هناك الآن. القصّة التي تُعاش أصدق من القصّة التي تُحكى.</p>
+  </section>
+
+  <!-- قصوى · ٥ · خلفيّة مولّدة -->
+  <section class="slide slide-statement" dir="rtl" data-particles>
+    <canvas class="particles-canvas" data-particles-canvas></canvas>
+    <div class="particles-caption">
+      <p class="kicker">٥ · اصنع جوًّا</p>
+      <p class="t-xl">قبل الكلمة… المزاج.</p>
+      <p class="t-md" style="color:#C9BCAE">الأجواء تهيّئ القلوب قبل أن تنطق. حرّك الفأرة، ودَع اللحظة تتنفّس.</p>
     </div>
   </section>
 
@@ -420,7 +597,141 @@
     });
   }
 
-  function render(slide) { renderBars(slide); renderLine(slide); renderMetrics(slide); renderConfetti(slide); }
+  // —— EXTREME demos: render hooks, fired when a demo slide becomes active ——
+
+  // Embedded live map: only load the tiles once its slide is reached.
+  function renderMap(slide) {
+    var f = slide.querySelector('[data-map-frame]');
+    if (!f) return;
+    if (!f.getAttribute('src') && f.getAttribute('data-src')) f.setAttribute('src', f.getAttribute('data-src'));
+  }
+
+  // Live embedded website: load on arrival, fade in over a poster fallback.
+  function renderLive(slide) {
+    var f = slide.querySelector('[data-live-frame]');
+    if (!f) return;
+    if (!f.getAttribute('src') && f.getAttribute('data-src')) {
+      f.addEventListener('load', function () { f.classList.add('loaded'); });
+      f.setAttribute('src', f.getAttribute('data-src'));
+    }
+  }
+
+  // Interactive 3D globe (Three.js via globe.gl), lazily loaded on first arrival.
+  var _globe = null, _globeInit = false;
+  function loadScript(src, cb) {
+    var s = document.createElement('script'); s.src = src; s.async = true; s.onload = cb;
+    document.head.appendChild(s);
+  }
+  function renderGlobe(slide) {
+    var holder = slide.querySelector('[data-globe]');
+    if (!holder) return;
+    if (_globe) { if (_globe.__resize) _globe.__resize(); return; }
+    if (_globeInit) return;
+    _globeInit = true;
+    loadScript('https://unpkg.com/globe.gl@2/dist/globe.gl.min.js', function () {
+      if (window.Globe) buildGlobe(holder);
+    });
+  }
+  function buildGlobe(holder) {
+    var hub = { lat: 24.7136, lng: 46.6753 };                 // Riyadh
+    var dests = [
+      { lat: 21.5433, lng: 39.1728 }, { lat: 26.4207, lng: 50.0888 }, { lat: 26.6087, lng: 37.9216 },
+      { lat: 25.2048, lng: 55.2708 }, { lat: 41.0082, lng: 28.9784 }, { lat: 30.0444, lng: 31.2357 },
+      { lat: 48.8566, lng: 2.3522 },  { lat: 51.5074, lng: -0.1278 }, { lat: 40.7128, lng: -74.0060 },
+      { lat: 35.6762, lng: 139.6503 }
+    ];
+    var points = [hub].concat(dests);
+    var arcs = dests.map(function (d) {
+      return { startLat: hub.lat, startLng: hub.lng, endLat: d.lat, endLng: d.lng };
+    });
+    var g = window.Globe()(holder)
+      .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+      .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
+      .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
+      .showAtmosphere(true).atmosphereColor('#FF812C').atmosphereAltitude(0.18)
+      .pointsData(points).pointColor(function () { return '#FFC089'; })
+        .pointAltitude(0.012).pointRadius(0.34)
+      .arcsData(arcs).arcColor(function () { return ['rgba(255,129,44,0.9)', 'rgba(255,217,176,0.55)']; })
+        .arcDashLength(0.45).arcDashGap(0.22).arcDashAnimateTime(2200)
+        .arcStroke(0.55).arcAltitudeAutoScale(0.45);
+    function resize() { var r = holder.getBoundingClientRect(); g.width(r.width); g.height(r.height); }
+    resize();
+    var c = g.controls();
+    c.autoRotate = true; c.autoRotateSpeed = 0.7; c.enableZoom = true;
+    g.pointOfView({ lat: 22, lng: 45, altitude: 2.3 }, 0);
+    window.addEventListener('resize', resize);
+    holder.classList.add('ready');
+    _globe = g; _globe.__resize = resize;
+  }
+
+  // Live what-if model: re-sync the chart whenever the slide is reached.
+  function renderWhatif(slide) { if (slide.__wiCompute) slide.__wiCompute(); }
+
+  // Generative particle field: a mouse-reactive constellation on canvas.
+  var _particles = null;
+  function renderParticles(slide) {
+    var canvas = slide.querySelector('[data-particles-canvas]');
+    if (!canvas) return;
+    if (!_particles) _particles = makeParticles(slide, canvas);
+    _particles.start();
+  }
+  function makeParticles(slide, canvas) {
+    var ctx = canvas.getContext('2d');
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var pts = [], mouse = { x: -9999, y: -9999 }, raf = 0;
+    function resize() {
+      var r = slide.getBoundingClientRect();
+      canvas.width = Math.max(1, Math.round(r.width * dpr));
+      canvas.height = Math.max(1, Math.round(r.height * dpr));
+    }
+    function seed() {
+      var n = Math.max(42, Math.min(104, Math.round(canvas.width / dpr / 16)));
+      pts = [];
+      for (var i = 0; i < n; i++) pts.push({
+        x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.45 * dpr, vy: (Math.random() - 0.5) * 0.45 * dpr
+      });
+    }
+    slide.addEventListener('pointermove', function (e) {
+      var r = canvas.getBoundingClientRect();
+      mouse.x = (e.clientX - r.left) * dpr; mouse.y = (e.clientY - r.top) * dpr;
+    });
+    slide.addEventListener('pointerleave', function () { mouse.x = mouse.y = -9999; });
+    window.addEventListener('resize', function () {
+      if (slide.classList.contains('active')) { resize(); seed(); }
+    });
+    var D = 132 * dpr;
+    function step() {
+      if (!slide.classList.contains('active')) { raf = 0; return; }   // pause off-screen
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      var i, a, b;
+      for (i = 0; i < pts.length; i++) {
+        var p = pts[i];
+        var dxm = mouse.x - p.x, dym = mouse.y - p.y, dm = Math.sqrt(dxm * dxm + dym * dym);
+        if (dm < 210 * dpr && dm > 0.5) { p.vx += dxm / dm * 0.05 * dpr; p.vy += dym / dm * 0.05 * dpr; }
+        p.x += p.vx; p.y += p.vy; p.vx *= 0.992; p.vy *= 0.992;
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+        p.x = Math.max(0, Math.min(canvas.width, p.x));
+        p.y = Math.max(0, Math.min(canvas.height, p.y));
+      }
+      for (a = 0; a < pts.length; a++) for (b = a + 1; b < pts.length; b++) {
+        var dx = pts[a].x - pts[b].x, dy = pts[a].y - pts[b].y, d = Math.sqrt(dx * dx + dy * dy);
+        if (d < D) {
+          ctx.strokeStyle = 'rgba(255,129,44,' + ((1 - d / D) * 0.5).toFixed(3) + ')';
+          ctx.lineWidth = dpr;
+          ctx.beginPath(); ctx.moveTo(pts[a].x, pts[a].y); ctx.lineTo(pts[b].x, pts[b].y); ctx.stroke();
+        }
+      }
+      ctx.fillStyle = 'rgba(255,165,89,0.92)';
+      for (i = 0; i < pts.length; i++) { ctx.beginPath(); ctx.arc(pts[i].x, pts[i].y, 1.9 * dpr, 0, 6.2832); ctx.fill(); }
+      raf = requestAnimationFrame(step);
+    }
+    function start() { resize(); seed(); if (!raf) raf = requestAnimationFrame(step); }
+    return { start: start };
+  }
+
+  function render(slide) { renderBars(slide); renderLine(slide); renderMetrics(slide); renderConfetti(slide); renderMap(slide); renderLive(slide); renderGlobe(slide); renderWhatif(slide); renderParticles(slide); }
 
   var obs = new MutationObserver(function (muts) {
     muts.forEach(function (m) {
@@ -534,6 +845,52 @@
         }
       });
     });
+  })();
+
+  // —— EXTREME demos: one-time interaction bindings ——
+
+  // 3 · Live investment model: three sliders drive animated stacked bars toward a goal.
+  (function bindInvest() {
+    var slide = document.querySelector('[data-whatif]');
+    if (!slide) return;
+    var $ = function (s) { return slide.querySelector(s); };
+    var contribIn = $('[data-iv-contrib-input]'), rateIn = $('[data-iv-rate-input]'), yearsIn = $('[data-iv-years-input]');
+    if (!contribIn) return;
+    var contribLab = $('[data-iv-contrib]'), rateLab = $('[data-iv-rate]'), yearsLab = $('[data-iv-years]');
+    var finalEl = $('[data-iv-final]'), contributedEl = $('[data-iv-contributed]'), growthEl = $('[data-iv-growth]');
+    var barsG = $('[data-iv-bars]'), goalLine = $('[data-iv-goal]');
+    var NS = 'http://www.w3.org/2000/svg', W = 600, H = 300, pad = 10, NB = 22, goal = 1000000;
+    var slot = (W - 2 * pad) / NB, prin = [], grow = [], k;
+    for (k = 0; k < NB; k++) {                                  // 22 persistent bars → CSS can animate them
+      var x = (pad + k * slot + slot * 0.12).toFixed(1), w = (slot * 0.76).toFixed(1);
+      var rg = document.createElementNS(NS, 'rect'); rg.setAttribute('class', 'iv-bar-growth'); rg.setAttribute('x', x); rg.setAttribute('width', w);
+      var rp = document.createElementNS(NS, 'rect'); rp.setAttribute('class', 'iv-bar-prin'); rp.setAttribute('x', x); rp.setAttribute('width', w);
+      barsG.appendChild(rg); barsG.appendChild(rp); grow.push(rg); prin.push(rp);
+    }
+    function fmt(n) { return Math.round(n).toLocaleString('en-US'); }
+    function fv(t, m, mr) { return mr === 0 ? m * t : m * (Math.pow(1 + mr, t) - 1) / mr; }   // future value of a monthly annuity
+    function compute() {
+      var m = +contribIn.value, annual = +rateIn.value, years = +yearsIn.value;
+      var mr = annual / 100 / 12, total = years * 12;
+      var balFinal = fv(total, m, mr), contributed = m * total;
+      // Anchor the scale to the goal so the deposit slider visibly moves the bars.
+      var maxV = Math.max(balFinal, goal) * 1.08;
+      function Y(v) { return H - pad - (v / maxV) * (H - 2 * pad); }
+      var y0 = Y(0), i;
+      for (i = 0; i < NB; i++) {
+        var t = (i + 1) / NB * total, p = m * t, b = fv(t, m, mr), yp = Y(p), yb = Y(b);
+        prin[i].setAttribute('y', yp.toFixed(1)); prin[i].setAttribute('height', Math.max(0, y0 - yp).toFixed(1));
+        grow[i].setAttribute('y', yb.toFixed(1)); grow[i].setAttribute('height', Math.max(0, yp - yb).toFixed(1));
+      }
+      var yg = Y(goal); goalLine.setAttribute('y1', yg.toFixed(1)); goalLine.setAttribute('y2', yg.toFixed(1));
+      contribLab.textContent = fmt(m); rateLab.textContent = annual + '%'; yearsLab.textContent = years;
+      finalEl.textContent = fmt(balFinal); contributedEl.textContent = fmt(contributed); growthEl.textContent = fmt(balFinal - contributed);
+    }
+    contribIn.addEventListener('input', compute);
+    rateIn.addEventListener('input', compute);
+    yearsIn.addEventListener('input', compute);
+    slide.__wiCompute = compute;
+    compute();
   })();
 })();
 </script>
