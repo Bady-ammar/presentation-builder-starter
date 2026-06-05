@@ -214,8 +214,8 @@ html, body {
    light AND dark slides. Swap the <img src> (or remove it) to rebrand. */
 .deck-logo {
   position: fixed; top: 18px; left: 24px; z-index: 45;
-  height: 30px; width: auto; display: block;
-  padding: 7px 12px; border-radius: 10px;
+  height: 46px; width: auto; display: block;
+  padding: 9px 15px; border-radius: 12px;
   background: rgba(255,255,255,0.72);
   box-shadow: 0 1px 6px rgba(5,5,5,0.08);
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
