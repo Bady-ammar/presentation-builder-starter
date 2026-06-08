@@ -74,6 +74,27 @@ Python — it's purely for the review/refine step.
 Each presentation is self-contained — copy a folder to reuse it, or
 delete one to throw it away. See `presentations/example/` for the shape.
 
+## Cloning this? Keep your content private
+
+This is a **public** starter repo, meant to be **copied, not contributed
+to**. A few things worth knowing before you commit anything:
+
+- **Don't open a pull request with your decks.** A PR publishes its diff on
+  GitHub for anyone to see — slide text, client names, numbers, the saved
+  brief in `notes.md`. The only changes worth sending upstream are
+  improvements to the *tooling* (`theme.css`, `deck.js`, `review.py`), never
+  anything under `presentations/`.
+- **Your decks stay out of git by default.** Everything under
+  `presentations/` is git-ignored (except the shipped `example/`), so a
+  routine `git add -A` won't sweep your content into a commit. Want your own
+  decks version-controlled? Keep them in a **separate, private** repo and
+  force-add: `git add -f presentations/<name>/deck.html`.
+- **Detach from this repo's origin** so you never push here by reflex:
+  `git remote remove origin` (or repoint it at your own private repo).
+
+You *can't* accidentally push into this repo — you don't have write access —
+but these steps keep your own content from leaking anywhere public.
+
 ## Review and refine
 
 The first draft is never the last. To review a deck and ask for changes:

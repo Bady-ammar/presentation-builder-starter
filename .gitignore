@@ -12,8 +12,17 @@ Desktop.ini
 .idea/
 .claude/
 
+# Your decks live under presentations/ and are PRIVATE by default. This is a
+# PUBLIC starter repo — your content (client names, numbers, the saved brief in
+# notes.md) should never be committed to a clone of it. So everything under
+# presentations/ is ignored, except the shipped example that shows the format.
+#
+# Want your own decks version-controlled? Keep them in a SEPARATE private repo
+# and force-add past this rule:  git add -f presentations/<name>/deck.html
+presentations/*
+!presentations/example/
+
 # PDF exports — regenerate any time from a deck via Print → Save as PDF.
-# Your notes.md and deck.html under presentations/ are kept on purpose.
 presentations/**/*.pdf
 
 # Review feedback is local, transient working state — once your agent has
