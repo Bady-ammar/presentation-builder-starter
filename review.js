@@ -524,6 +524,8 @@
   function injectStyles() {
     var css = document.createElement("style");
     css.textContent =
+      // Never print the review chrome — it's on-screen only, like in fullscreen.
+      "@media print{.rv-toggle-btn,#review-panel,.rv-attach-btn{display:none!important}}" +
       // Floating toggle button — mirrors the course tool: round, top-right,
       // and hidden in fullscreen so it never shows while presenting.
       ".rv-toggle-btn{position:fixed;top:16px;right:16px;z-index:2002;width:44px;height:44px;border-radius:50%;" +

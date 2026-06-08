@@ -236,6 +236,9 @@ code, .mono {
 /* Print to PDF: one slide per page (use the browser's "Save as PDF") */
 @media print {
   @page { size: 1280px 720px; margin: 0; }
+  /* Print backgrounds/colors exactly as on screen — browsers drop fills
+     in PDF by default, which washes out the warm canvas and dark slides. */
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   html, body { background: #fff; }
   #deck { position: static; }
   #progress, #page-num, .deck-footer, .deck-logo { display: none; }
