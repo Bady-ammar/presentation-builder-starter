@@ -29,3 +29,4 @@ presentations/**/*.pdf
 # applied it, it's spent. Not part of the deck you share.
 review.jsonl
 presentations/**/review.jsonl
+.watch-seen.json

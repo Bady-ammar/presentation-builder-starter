@@ -126,6 +126,13 @@
           pill.textContent = "⚠ no watcher";
           pill.title = "Comments are saved, but no watcher is running — ask your agent to start watching.";
           showAskClaude(true);
+        } else if (L.status === "handling" && age < 600) {
+          // The watcher exited on purpose to hand your comment to the agent,
+          // who is acting on it now — that's work in progress, not a dead watcher.
+          pill.classList.add("busy");
+          pill.textContent = "✎ agent working…";
+          pill.title = "Your comment reached the agent " + Math.round(age) + "s ago and it's acting on it. The watcher restarts when it's done.";
+          showAskClaude(false);
         } else if (age < 45) {
           pill.classList.add("live");
           pill.textContent = "● watcher live";
@@ -197,6 +204,17 @@
     sendBtn.addEventListener("click", sendComment);
     editBtn.addEventListener("click", toggleEdit);
     panel.querySelector(".rv-close").addEventListener("click", close);
+
+    // Clicking a sent comment jumps the deck to the slide it's about,
+    // via the small API deck.js exposes (window.deck.go).
+    sentList.addEventListener("click", function (e) {
+      var li = e.target.closest ? e.target.closest("li[data-slide]") : null;
+      if (!li || !sentList.contains(li)) return;
+      var i = parseInt(li.getAttribute("data-slide"), 10);
+      if (isNaN(i) || !window.deck || typeof window.deck.go !== "function") return;
+      window.deck.go(i);
+      updateSlideInfo();
+    });
 
     // Ctrl/Cmd+Enter sends; Esc closes. Stop these keys from reaching the
     // deck so typing a comment never advances slides.
@@ -296,10 +314,11 @@
         if (!items.length) { sentList.innerHTML = '<li class="rv-empty">Nothing yet.</li>'; return; }
         sentList.innerHTML = items.slice(-8).reverse().map(function (it) {
           var done = it.status === "done";
+          var idx = it.slideIndex | 0;
           var label = it.type === "edit"
-            ? "✎ edit · slide " + ((it.slideIndex | 0) + 1)
-            : "“" + (it.comment || "").slice(0, 60) + (it.comment && it.comment.length > 60 ? "…" : "") + "”";
-          return '<li class="' + (done ? "rv-done" : "rv-pending") + '">' +
+            ? "✎ edit · slide " + (idx + 1)
+            : "slide " + (idx + 1) + " · “" + (it.comment || "").slice(0, 60) + (it.comment && it.comment.length > 60 ? "…" : "") + "”";
+          return '<li class="' + (done ? "rv-done" : "rv-pending") + '" data-slide="' + idx + '" title="Go to slide ' + (idx + 1) + '">' +
                    '<span class="rv-badge-pill">' + (done ? "done ✓" : "pending") + "</span> " +
                    escapeHTML(label) + "</li>";
         }).join("");
@@ -559,6 +578,7 @@
       "padding:3px 9px;border-radius:999px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}" +
       "#review-panel .rv-status.unknown{background:#ece4d6;color:#8a8178}" +
       "#review-panel .rv-status.live{background:#e2f0e7;color:#2f7d4f}" +
+      "#review-panel .rv-status.busy{background:#e7e3f6;color:#5b4ab3}" +
       "#review-panel .rv-status.stale{background:#f8ecd0;color:#9a6a12}" +
       "#review-panel .rv-status.offline{background:#f7e0dd;color:#b3382c}" +
       "#review-panel .rv-close{margin-left:auto;background:none;border:none;color:var(--ink-faint,#9a8e84);font-size:24px;line-height:1;cursor:pointer;padding:0 4px}" +
@@ -580,6 +600,8 @@
       "#review-panel .rv-sent-title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint,#9a8e84);margin-top:4px}" +
       "#review-panel .rv-sent{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}" +
       "#review-panel .rv-sent li{font-size:12.5px;line-height:1.4;color:var(--ink-soft,#6b5f57);background:#fff;border:1px solid var(--rule,#e4d8c7);border-radius:6px;padding:6px 8px}" +
+      "#review-panel .rv-sent li[data-slide]{cursor:pointer}" +
+      "#review-panel .rv-sent li[data-slide]:hover{border-color:var(--accent,#ff812c);background:var(--bg-tint,#f2e9dc)}" +
       "#review-panel .rv-empty{color:var(--ink-faint,#9a8e84);background:none!important;border:none!important;padding-left:0!important}" +
       "#review-panel .rv-badge-pill{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;margin-right:6px;vertical-align:middle}" +
       "#review-panel .rv-pending .rv-badge-pill{background:#f8ecd0;color:#9a6a12}" +

@@ -34,8 +34,19 @@ ROOT = Path(__file__).resolve().parent
 # Last time the watcher (watch.py) checked in, as epoch seconds. The review
 # panel polls /__review/health and turns this into a "watcher live" pill so
 # you can see at a glance whether your agent is listening. None = never seen.
+# Status: "watching" = watcher polling; "handling" = it handed comments to
+# the agent and exited — the agent is working, not gone. Acks also count as
+# "handling" heartbeats, so a long multi-comment session stays visibly alive.
 _HB_LOCK = threading.Lock()
 _LAST_HEARTBEAT = None
+_HB_STATUS = "watching"
+
+
+def _touch_heartbeat(status):
+    global _LAST_HEARTBEAT, _HB_STATUS
+    with _HB_LOCK:
+        _LAST_HEARTBEAT = time.time()
+        _HB_STATUS = status
 
 CONTENT_TYPES = {
     ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8",
@@ -101,10 +112,11 @@ class Handler(BaseHTTPRequestHandler):
 
         if path == "/__review/health":
             with _HB_LOCK:
-                last = _LAST_HEARTBEAT
+                last, status = _LAST_HEARTBEAT, _HB_STATUS
             age = None if last is None else round(time.time() - last, 1)
             return self._json(200, {"ok": True, "root": str(ROOT),
-                                    "listener": {"last_seen_seconds_ago": age}})
+                                    "listener": {"last_seen_seconds_ago": age,
+                                                 "status": status}})
 
         if path == "/__review/comments":
             q = parse_qs(parsed.query)
@@ -263,13 +275,14 @@ class Handler(BaseHTTPRequestHandler):
                 rec["status"] = "done"
             lines.append(json.dumps(rec, ensure_ascii=False))
         f.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        # An ack means the agent is alive and mid-review — keep the panel's
+        # pill on "agent working…" even though the watcher itself has exited.
+        _touch_heartbeat("handling")
         return self._json(200, {"ok": True})
 
     def _post_heartbeat(self, body):
         # The watcher (watch.py) pings this every few seconds while it's alive.
-        global _LAST_HEARTBEAT
-        with _HB_LOCK:
-            _LAST_HEARTBEAT = time.time()
+        _touch_heartbeat(body.get("status") or "watching")
         return self._json(200, {"ok": True})
 
 

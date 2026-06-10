@@ -223,4 +223,16 @@
   if (start && start >= 1 && start <= slides.length) current = start - 1;
 
   render();
+
+  // Tiny public API — lets the review overlay (review.js) jump to the slide
+  // a comment points at. go(i) is 0-based and reveals the slide's fragments,
+  // like the navigator, so the slide arrives whole.
+  window.deck = {
+    go: function (i) {
+      go(i);
+      fragments(slides[current]).forEach(function (f) { f.classList.add("visible"); });
+    },
+    current: function () { return current; },
+    count: slides.length,
+  };
 })();

@@ -346,7 +346,12 @@ fixes that: it blocks until the next comment(s) land, prints them, and
 
 (Any comment that arrives while you're busy isn't lost — the next `--wait`
 run drains the backlog immediately and exits. `watch.py` also pings the
-server so the panel shows a green **● watcher live** status.)
+server so the panel shows a green **● watcher live** status; while you're
+handling a hand-off the panel shows **✎ agent working…** instead, and each
+ack keeps that status fresh. Comments already handed to you are remembered
+in `.watch-seen.json` at the repo root, so a relaunched `--wait` never
+re-prints — or instantly re-exits on — a record you already have; if one
+of those is still pending it reports a backlog count on stderr instead.)
 
 For each printed block:
 
