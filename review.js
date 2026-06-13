@@ -74,6 +74,7 @@
     buildButton();
     buildPanel();
     bindKeys();
+    observeSlideChange();
     refreshSent();
     refreshStatus();
     setInterval(refreshSent, 4000);
@@ -271,6 +272,24 @@
     var s = activeSlide();
     var title = slideTitle(s) || "(No title)";
     slideInfo.textContent = "Slide " + (activeIndex() + 1) + " of " + slides().length + " — " + title;
+  }
+
+  // Keep the panel's "Slide N of M — title" in sync with the deck. deck.js
+  // moves between slides by toggling the `active` class (keyboard nav, the
+  // navigator, deep-links) without telling us, so watch each slide's class
+  // attribute and refresh the info line whenever the active slide changes.
+  function observeSlideChange() {
+    if (typeof MutationObserver === "undefined") return;
+    var lastIdx = activeIndex();
+    var obs = new MutationObserver(function () {
+      var idx = activeIndex();
+      if (idx === lastIdx) return;
+      lastIdx = idx;
+      updateSlideInfo();
+    });
+    slides().forEach(function (s) {
+      obs.observe(s, { attributes: true, attributeFilter: ["class"] });
+    });
   }
 
   // ---- comments -----------------------------------------------------
