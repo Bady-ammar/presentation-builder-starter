@@ -196,8 +196,10 @@ class Handler(BaseHTTPRequestHandler):
             "slideTitle": body.get("slideTitle", ""),
             "comment": body["comment"],
         }
-        # Optional: a specific element the reviewer pinned with the Attach button.
-        for k in ("elementId", "elementTag", "elementClasses", "elementSnippet"):
+        # slideFingerprint = the slide's normalized text, so the comment can be
+        # re-matched to its slide after the deck is reordered, and elementId/…
+        # the specific element the reviewer pinned with the Attach button.
+        for k in ("slideFingerprint", "elementId", "elementTag", "elementClasses", "elementSnippet"):
             if body.get(k):
                 rec[k] = body[k]
         self._append_review(body["slidePath"], rec)

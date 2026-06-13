@@ -355,9 +355,19 @@ of those is still pending it reports a backlog count on stderr instead.)
 
 For each printed block:
 
-1. Read the slide it points at (`slideIndex`, 0-based) in
-   `presentations/<name>/deck.html` and apply the change the comment
-   asks for — follow the existing house style, never break a slide.
+1. Read the slide it points at in `presentations/<name>/deck.html` and
+   apply the change the comment asks for — follow the existing house
+   style, never break a slide.
+   - **Find the slide by content, not by `slideIndex` alone.** The index
+     is just where the slide sat *when the comment was left*; if slides
+     were added or deleted since, it now points at the wrong one. Confirm
+     by `slideTitle` and `slideFingerprint` (the slide's normalized text):
+     locate the slide whose heading/text matches, and only fall back to
+     `slideIndex` when neither is present. The text may have been edited
+     since the comment (by an earlier note in the same batch), so match the
+     *closest* remaining slide — a shared heading or most of the same body
+     is enough. Only when nothing resembles it was the slide truly deleted —
+     say so and ack, rather than editing a bystander.
    - **If the record has an `elementId`** (the reviewer used 📌 Attach),
      the comment is about that one element. The record also carries
      `elementTag`, `elementClasses`, and `elementSnippet`. `elementId` is

@@ -49,6 +49,82 @@
     var h = slide.querySelector("h1, h2, h3, .t-hero, .t-xl, .t-lg");
     return h ? h.textContent.trim().slice(0, 80) : "";
   }
+  // A content fingerprint of a slide: its normalized text, capped. Unlike the
+  // positional index, this survives slides being added or removed above it, so
+  // we can re-find the slide a comment was left on even after the deck shifts.
+  function slideFingerprint(slide) {
+    return (slide.textContent || "").trim().replace(/\s+/g, " ").slice(0, 200);
+  }
+
+  // Word-overlap similarity (Dice coefficient, 0..1) — lets us re-find a slide
+  // whose text was *edited* since the comment was left, not just one that moved.
+  function wordsOf(str) {
+    return (str || "").toLowerCase().split(/\s+/).filter(Boolean);
+  }
+  function similarity(a, b) {
+    if (!a.length || !b.length) return 0;
+    var counts = Object.create(null), inter = 0;
+    for (var i = 0; i < a.length; i++) counts[a[i]] = (counts[a[i]] || 0) + 1;
+    for (var j = 0; j < b.length; j++) if (counts[b[j]] > 0) { counts[b[j]]--; inter++; }
+    return (2 * inter) / (a.length + b.length);
+  }
+
+  // Find a record's slide in the *current* deck. Identity is the slide's
+  // content, not its position, so the link survives both reordering AND the
+  // slide's own text being edited:
+  //   1. exact fingerprint/title → untouched slide, even if it moved
+  //   2. fuzzy word overlap      → the slide was edited in place since
+  //   3. give up (-1)            → deleted, or rewritten past recognition
+  // The stored index only breaks ties between equally-good matches.
+  var FUZZY_MIN = 0.5;  // share of words that must still overlap to count as the same slide
+  function resolveIndex(rec) {
+    var s = slides();
+    var stored = parseInt(rec && rec.slideIndex, 10);
+    if (isNaN(stored)) stored = -1;
+    var title = (rec && rec.slideTitle || "").trim();
+    var fp = (rec && rec.slideFingerprint || "").trim();
+
+    function nearest(hits) {
+      if (stored < 0) return hits[0];
+      var best = hits[0], bestD = Infinity;
+      for (var i = 0; i < hits.length; i++) {
+        var d = Math.abs(hits[i] - stored);
+        if (d < bestD) { bestD = d; best = hits[i]; }
+      }
+      return best;
+    }
+    function exact(valueOf, want) {
+      var hits = [];
+      for (var i = 0; i < s.length; i++) if (valueOf(s[i]) === want) hits.push(i);
+      return hits.length ? nearest(hits) : -1;
+    }
+
+    // 1) Exact match — the slide is untouched (it may simply have moved).
+    if (fp) { var ef = exact(slideFingerprint, fp); if (ef >= 0) return ef; }
+    if (title) { var et = exact(slideTitle, title); if (et >= 0) return et; }
+
+    // No identifying text at all (e.g. older edit records): trust the stored
+    // slot only while it's still in range.
+    if (!fp && !title) return (stored >= 0 && stored < s.length) ? stored : -1;
+
+    // 2) Fuzzy match — the slide's text was edited since the comment. Score
+    //    word overlap against the richest signal we kept (the fingerprint, else
+    //    the title); the fingerprint covers the whole slide, so a reworded
+    //    heading still matches via the untouched body, and vice-versa. Ties
+    //    near the old index win, so an in-place edit beats a distant lookalike.
+    var want = wordsOf(fp || title);
+    var bestI = -1, bestScore = 0;
+    for (var i = 0; i < s.length; i++) {
+      var score = similarity(want, wordsOf(fp ? slideFingerprint(s[i]) : slideTitle(s[i])));
+      if (score > bestScore ||
+          (score > 0 && score === bestScore && stored >= 0 &&
+           Math.abs(i - stored) < Math.abs(bestI - stored))) {
+        bestScore = score; bestI = i;
+      }
+    }
+    // 3) Nothing left that resembles it — treat the slide as gone.
+    return bestScore >= FUZZY_MIN ? bestI : -1;
+  }
 
   // ---- network ------------------------------------------------------
   function postJSON(url, body) {
@@ -209,9 +285,12 @@
     // Clicking a sent comment jumps the deck to the slide it's about,
     // via the small API deck.js exposes (window.deck.go).
     sentList.addEventListener("click", function (e) {
-      var li = e.target.closest ? e.target.closest("li[data-slide]") : null;
+      var li = e.target.closest ? e.target.closest("li") : null;
       if (!li || !sentList.contains(li)) return;
-      var i = parseInt(li.getAttribute("data-slide"), 10);
+      if (li.classList.contains("rv-gone")) { toast("That slide was removed from the deck."); return; }
+      var ds = li.getAttribute("data-slide");
+      if (ds === null) return;
+      var i = parseInt(ds, 10);
       if (isNaN(i) || !window.deck || typeof window.deck.go !== "function") return;
       window.deck.go(i);
       updateSlideInfo();
@@ -301,6 +380,7 @@
       slidePath: location.pathname,
       slideIndex: activeIndex(),
       slideTitle: slideTitle(slide),
+      slideFingerprint: slideFingerprint(slide),
       comment: text,
     };
     if (attachedInfo) {
@@ -333,11 +413,16 @@
         if (!items.length) { sentList.innerHTML = '<li class="rv-empty">Nothing yet.</li>'; return; }
         sentList.innerHTML = items.slice(-8).reverse().map(function (it) {
           var done = it.status === "done";
-          var idx = it.slideIndex | 0;
-          var label = it.type === "edit"
-            ? "✎ edit · slide " + (idx + 1)
-            : "slide " + (idx + 1) + " · “" + (it.comment || "").slice(0, 60) + (it.comment && it.comment.length > 60 ? "…" : "") + "”";
-          return '<li class="' + (done ? "rv-done" : "rv-pending") + '" data-slide="' + idx + '" title="Go to slide ' + (idx + 1) + '">' +
+          // Re-resolve to the slide's CURRENT position so the number stays
+          // right after slides are added or removed. -1 → its slide is gone.
+          var cur = resolveIndex(it);
+          var gone = cur < 0;
+          var where = gone ? "slide removed" : "slide " + (cur + 1);
+          var snippet = (it.comment || "").slice(0, 60) + (it.comment && it.comment.length > 60 ? "…" : "");
+          var label = it.type === "edit" ? "✎ edit · " + where : where + " · “" + snippet + "”";
+          var cls = (done ? "rv-done" : "rv-pending") + (gone ? " rv-gone" : "");
+          var attrs = gone ? "" : ' data-slide="' + cur + '" title="Go to slide ' + (cur + 1) + '"';
+          return '<li class="' + cls + '"' + attrs + '>' +
                    '<span class="rv-badge-pill">' + (done ? "done ✓" : "pending") + "</span> " +
                    escapeHTML(label) + "</li>";
         }).join("");
@@ -621,6 +706,7 @@
       "#review-panel .rv-sent li{font-size:12.5px;line-height:1.4;color:var(--ink-soft,#6b5f57);background:#fff;border:1px solid var(--rule,#e4d8c7);border-radius:6px;padding:6px 8px}" +
       "#review-panel .rv-sent li[data-slide]{cursor:pointer}" +
       "#review-panel .rv-sent li[data-slide]:hover{border-color:var(--accent,#ff812c);background:var(--bg-tint,#f2e9dc)}" +
+      "#review-panel .rv-sent li.rv-gone{opacity:.55;cursor:default}" +
       "#review-panel .rv-empty{color:var(--ink-faint,#9a8e84);background:none!important;border:none!important;padding-left:0!important}" +
       "#review-panel .rv-badge-pill{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;margin-right:6px;vertical-align:middle}" +
       "#review-panel .rv-pending .rv-badge-pill{background:#f8ecd0;color:#9a6a12}" +
