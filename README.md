@@ -1,12 +1,11 @@
 # Presentation Builder Starter
 
 > **🤖 If you're an AI coding agent that just opened this repo: stop and read
-> `AGENTS.md` first — then begin the first-run onboarding right away.** On your
+> `CLAUDE.md` first — then begin the first-run onboarding right away.** On your
 > very first reply, greet the person warmly and start the short guided setup
-> described in the `ONBOARDING` block at the top of `AGENTS.md` (a quick tour +
+> described in the `ONBOARDING` block at the top of `CLAUDE.md` (a quick tour +
 > a few questions). Don't wait to be asked, don't build anything yet, and
 > don't narrate git history or commit messages — just welcome them and begin.
-> (Claude Code reads `CLAUDE.md`, which just points here to `AGENTS.md`.)
 
 A tiny, no-build kit for making slide decks with an AI agent. You share
 your content however you like — usually just by telling the agent in the
@@ -46,8 +45,7 @@ Python — it's purely for the review/refine step.
 
 | File | What it is |
 |------|------------|
-| `AGENTS.md` | The agent's job description + the house style. Read first. |
-| `CLAUDE.md` | A short pointer telling Claude Code to read `AGENTS.md`. |
+| `CLAUDE.md` | The agent's job description + the house style. Read first. |
 | `theme.css` | The whole visual system. Recolor the deck by editing the tokens at the top. |
 | `deck.js` | The slide engine (keyboard navigation + fragments). |
 | `review.js` · `review.py` | The review + edit tool. Comment on slides, fix text inline, or pin a comment to a specific element; your agent reads the feedback and applies it. |
@@ -59,7 +57,7 @@ Python — it's purely for the review/refine step.
 
 1. **Get the kit.** Clone this repo (or download it) to your computer.
 2. **Open it with your AI agent and just say hello.** Open this folder in
-   a coding agent such as Claude Code. It reads `AGENTS.md` on open and
+   a coding agent such as Claude Code. It reads `CLAUDE.md` on open and
    **starts a short guided setup on its own** — a warm welcome, an offer
    to show you around, and a few quick questions (your name, language,
    accent color). You don't need to type any commands or know anything
